@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Стартовая страница</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23a78bfa'/%3E%3Cstop offset='100%25' stop-color='%2360a5fa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23g)'/%3E%3Ctext x='50' y='68' font-size='52' font-weight='700' font-family='Segoe UI,sans-serif' text-anchor='middle' fill='%23fff'%3ES%3C/text%3E%3C/svg%3E">
     <style>
         * {
             box-sizing: border-box;
@@ -22,18 +23,37 @@
         .background {
             position: absolute;
             top: -10px; left: -10px; right: -10px; bottom: -10px;
-            background: url('anime.gif') no-repeat center center/cover;
+            background: url('gif/anime.gif') no-repeat center center/cover;
             filter: blur(15px) brightness(0.6);
             z-index: 1;
+        }
+        /* Холст для частиц */
+        #particles {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            display: block;
         }
         /* Контент по центру */
         .container {
             position: relative;
-            z-index: 2;
+            z-index: 3;
             text-align: center;
             width: 100%;
             max-width: 600px;
             padding: 20px;
+        }
+        /* Стеклянная панель */
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 50px 40px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+
+            animation: fadeInUp 0.6s ease-out;
         }
         /* Красивые часы */
         .clock {
@@ -43,10 +63,12 @@
             margin-bottom: 25px;
             text-shadow: 0 0 20px rgba(255,255,255,0.4);
             letter-spacing: 2px;
+            font-variant-numeric: tabular-nums;
         }
         /* Поисковая строка */
         .search-box {
             position: relative;
+            margin-top: 12px;
         }
         .search-box input[type="text"] {
             width: 100%;
@@ -68,7 +90,416 @@
         .search-box input[type="text"]::placeholder {
             color: rgba(255, 255, 255, 0.6);
         }
-        /* Ссылка-невидимка для обхода блокировок Хрома */
+
+        /* Дата и приветствие */
+        .greeting {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        .greeting .date {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            margin-top: 4px;
+        }
+        .greeting .greeting-text {
+            font-weight: 400;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        /* Погода */
+        .weather {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 10px;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+        /* Прогноз на 3 дня */
+        .forecast {
+            display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
+            font-size: 0.75rem; color: rgba(255,255,255,0.8);
+            margin-top: 6px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 6px;
+        }
+        .forecast-day {
+            display: flex; flex-direction: column; align-items: center; gap: 1px;
+            flex: 0 0 52px;
+        }
+        .forecast-day span:first-child { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+        .forecast-day .f-emoji { font-size: 1rem; line-height: 1.2; }
+        /* Сетка иконок */
+        .icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+        }
+        .icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .icons a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transform: translateY(-3px);
+        }
+        .icons a .link-icon {
+            width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; font-weight: 400;
+            color: inherit; text-decoration: none;
+        }
+        .icons a .link-icon img { width: 20px; height: 20px; border-radius: 3px; }
+        .icons a svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+        /* Кнопки сверху */
+        .top-btn {
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            opacity: 0.25;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .top-btn:hover {
+            opacity: 1;
+            transform: scale(1.15);
+        }
+        .top-btn svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+        .top-btn.playing {
+            opacity: 0.7;
+            color: #a78bfa;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        /* Оверлей настроек */
+        .settings-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .settings-overlay.open {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .settings-panel {
+            background: rgba(20, 20, 30, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 30px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            width: 90%;
+            max-width: 520px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: fadeInUp 0.4s ease;
+        }
+        .settings-panel h2 {
+            color: #fff;
+            font-weight: 300;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .settings-panel .close-btn {
+            float: right;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+        .settings-panel .close-btn:hover {
+            color: #fff;
+        }
+        .gif-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+        }
+        .gif-grid .gif-item {
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s, transform 0.2s;
+            aspect-ratio: 16/9;
+        }
+        .gif-grid .gif-item:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+        .gif-grid .gif-item.active {
+            border-color: #fff;
+        }
+        .gif-grid .gif-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        /* Кнопки эффектов */
+        .p-btn.active {
+            border-color: rgba(255, 255, 255, 0.5) !important;
+            color: #fff !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+        }
+        /* Стилизация скроллбара */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+        html { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.12) transparent; }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 14px; height: 14px; border-radius: 50%;
+            background: rgba(255,255,255,0.5); border: none;
+            cursor: pointer; transition: background 0.2s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { background: rgba(255,255,255,0.8); }
+        input[type=range]::-moz-range-thumb {
+            width: 14px; height: 14px; border-radius: 50%;
+            background: rgba(255,255,255,0.5); border: none;
+            cursor: pointer;
+        }
+        .settings-input {
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.8rem;
+            outline: none;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        .settings-input:focus {
+            border-color: rgba(255,255,255,0.35);
+        }
+        .settings-input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+        /* Панель заметок и курсов */
+        .notes-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100vh;
+            width: 300px;
+            z-index: 90;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+        }
+        .notes-panel.open {
+            transform: translateX(0);
+        }
+        .notes-panel .notes-body {
+            flex: 1;
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-left: 1px solid rgba(255,255,255,0.06);
+            padding: 16px 14px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .notes-body h3 {
+            color: rgba(255,255,255,0.6);
+            font-weight: 300;
+            font-size: 0.9rem;
+            margin: 0 0 10px 0;
+            text-align: center;
+        }
+        .notes-input-row {
+            display: flex; gap: 6px; margin-bottom: 12px;
+        }
+        .notes-input-row input {
+            flex: 1;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px; padding: 7px 10px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.75rem; outline: none;
+        }
+        .notes-input-row input:focus {
+            border-color: rgba(255,255,255,0.25);
+        }
+        .notes-input-row input::placeholder {
+            color: rgba(255,255,255,0.25);
+        }
+        .notes-input-row button {
+            width: 30px; height: 30px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.5);
+            cursor: pointer; font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: all 0.3s;
+        }
+        .notes-input-row button:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+        #noteList {
+            list-style: none; padding: 0; margin: 0;
+            flex: 1; overflow-y: auto; min-height: 0;
+        }
+        #noteList li {
+            display: flex; align-items: center; gap: 6px;
+            padding: 4px 6px; border-radius: 6px;
+            transition: background 0.2s; word-break: break-all;
+        }
+        #noteList li:hover { background: rgba(255,255,255,0.04); }
+        #noteList li .note-text {
+            flex: 1; color: rgba(255,255,255,0.65);
+            font-size: 0.75rem; line-height: 1.3;
+        }
+        #noteList li .note-text a { color: #93c5fd; text-decoration: underline; }
+        #noteList li .note-del {
+            width: 18px; height: 18px; border-radius: 4px;
+            border: none; background: none;
+            color: rgba(255,255,255,0.2); cursor: pointer;
+            font-size: 0.9rem; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        #noteList li .note-del:hover { color: #f87171; background: rgba(248,113,113,0.1); }
+        .rates-section {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 10px; margin-top: auto;
+        }
+        .rates-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .rate-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px; padding: 5px 8px; text-align: center;
+        }
+        .rate-item .rate-pair {
+            font-size: 0.6rem; color: rgba(255,255,255,0.3);
+        }
+        .rate-item .rate-value {
+            font-size: 0.8rem; color: rgba(255,255,255,0.75);
+            font-weight: 400;
+        }
+        .rate-item .rate-sub {
+            font-size: 0.55rem; color: rgba(255,255,255,0.2);
+        }
+        /* Ссылки в настройках */
+        .link-settings-row {
+            display: flex; align-items: center; gap: 6px;
+            padding: 4px 6px; border-radius: 6px;
+            background: rgba(255,255,255,0.03); font-size: 0.7rem;
+        }
+        .link-settings-row .link-name { flex: 1; color: rgba(255,255,255,0.6); }
+        .link-settings-row .link-url { flex: 2; color: rgba(255,255,255,0.3); font-size: 0.65rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .link-settings-row .link-del {
+            width: 18px; height: 18px; border-radius: 4px;
+            border: none; background: none; color: rgba(255,255,255,0.2);
+            cursor: pointer; font-size: 0.8rem; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .link-settings-row .link-del:hover { color: #f87171; background: rgba(248,113,113,0.1); }
+        /* Пасхалка 333 */
+        .easter-egg {
+            position: fixed; inset: 0; z-index: 999;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.5);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.6s ease;
+        }
+        .easter-egg.show { opacity: 1; }
+        .easter-egg img {
+            max-width: 80vw; max-height: 80vh;
+            border-radius: 20px; box-shadow: 0 0 60px rgba(0,0,0,0.5);
+        }
+        /* Drag-n-drop заметок */
+        #noteList li[draggable="true"] { cursor: grab; }
+        #noteList li.dragging { opacity: 0.4; }
+        #noteList li.drag-over { border-top: 2px solid rgba(255,255,255,0.3); }
+        /* Стрелка-кнопка */
+        .notes-trigger {
+            position: fixed;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 91;
+            width: 34px;
+            height: 34px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            transition: opacity 0.3s, background 0.3s, border-color 0.3s;
+            user-select: none;
+            opacity: 0.7;
+            background: rgba(20, 20, 30, 0.25);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1.5px solid rgba(255,255,255,0.3);
+            color: #fff;
+        }
+        .notes-trigger:hover {
+            opacity: 1;
+            background: rgba(20, 20, 30, 0.4);
+            border-color: rgba(255,255,255,0.6);
+        }
+        .notes-trigger svg {
+            width: 18px;
+            height: 18px;
+            transition: transform 0.3s;
+        }
+        .notes-panel.open ~ .notes-trigger svg {
+            transform: rotate(180deg);
+        }
+        .notes-body h3 {
+            color: rgba(255,255,255,0.7);
+            font-weight: 300;
+            font-size: 0.95rem;
+            margin: 0 0 12px 0;
+            text-align: center;
+        }
         #hiddenLink {
             display: none;
         }
@@ -78,39 +509,1207 @@
 
     <div class="background"></div>
 
-    <div class="container">
-        <!-- Часы -->
-        <div class="clock" id="clock">00:00:00</div>
+    <canvas id="particles"></canvas>
 
-        <!-- Поисковая строка (без тегов формы) -->
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Поиск в Google..." autofocus autocomplete="off">
+    <div class="container">
+        <div class="glass" style="position:relative">
+            <!-- Кнопки -->
+            <div style="position:absolute;top:16px;right:20px;display:flex;gap:8px;z-index:5">
+                <div class="top-btn" id="musicBtn" title="Lo-fi музыка">
+                    <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                </div>
+                <div class="top-btn" id="settingsBtn" title="Настройки">
+                    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>
+                </div>
+            </div>
+            <!-- Часы -->
+            <div class="clock" id="clock">00:00:00</div>
+
+            <!-- Дата и приветствие -->
+            <div class="greeting" id="greeting">
+                <div class="greeting-text" id="greetingText"></div>
+                <div class="date" id="dateText"></div>
+            </div>
+
+            <!-- Погода -->
+            <div class="weather" id="weather">Загрузка погоды...</div>
+            <div class="forecast" id="forecast"></div>
+
+            <!-- Поисковая строка (без тегов формы) -->
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Поиск в Google..." autofocus autocomplete="off">
+            </div>
+
+            <!-- Иконки быстрого доступа -->
+            <div class="icons" id="linksContainer"></div>
         </div>
+    </div>
+
+    <!-- Оверлей настроек -->
+    <div class="settings-overlay" id="settingsOverlay">
+        <div class="settings-panel">
+            <button class="close-btn" id="settingsClose">&times;</button>
+            <h2>Оформление</h2>
+            <div class="gif-grid" id="gifGrid"></div>
+
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);text-align:center">
+                <div style="margin-bottom:12px;font-size:0.8rem;color:rgba(255,255,255,0.4)">— или загрузи свою —</div>
+                <label for="customGif" style="display:inline-block;padding:10px 20px;border-radius:12px;border:1px dashed rgba(255,255,255,0.3);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.85rem">
+                    Выбрать файл
+                    <input type="file" id="customGif" accept="image/gif,image/png,image/jpeg,image/webp" style="display:none">
+                </label>
+                <div id="customPreview" style="margin-top:14px;display:none;border-radius:12px;overflow:hidden;border:2px solid rgba(255,255,255,0.2);max-width:200px;margin-left:auto;margin-right:auto">
+                    <img id="customPreviewImg" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover" alt="preview">
+                </div>
+            </div>
+
+            <div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);text-align:center">
+                <div style="margin-bottom:12px;font-size:0.85rem;color:rgba(255,255,255,0.7)">Эффект частиц</div>
+                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+                    <label class="p-btn" data-p="off" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">Выкл</label>
+                    <label class="p-btn" data-p="sakura" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">🌸 Сакура</label>
+                    <label class="p-btn" data-p="rain" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">🌧 Дождь</label>
+                    <label class="p-btn" data-p="snow" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">❄ Снег</label>
+                     <label class="p-btn" data-p="ash" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">🔥 Огонь</label>
+                    <label class="p-btn" data-p="neon" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">💜 Неон</label>
+                    <label class="p-btn" data-p="ashpetal" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">🖤 Пепел</label>
+                </div>
+                <label id="muteBtn" style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:none">
+                    <span id="muteIcon">🔊</span> <span id="muteLabel">Звук вкл</span>
+                </label>
+                <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;align-items:center">
+                    <div style="display:flex;align-items:center;gap:10px">
+                        <span style="font-size:0.75rem;color:rgba(255,255,255,0.35);min-width:12px">✨</span>
+                        <input type="range" id="effectsVolume" min="0" max="100" value="30" style="width:140px;height:4px;border-radius:2px;background:rgba(255,255,255,0.12);-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;accent-color:rgba(255,255,255,0.4)">
+                        <span id="effectsVolLabel" style="font-size:0.75rem;color:rgba(255,255,255,0.35);min-width:24px;text-align:center">30</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px">
+                        <span style="font-size:0.75rem;color:rgba(255,255,255,0.35);min-width:12px">🎵</span>
+                        <input type="range" id="lofiVolume" min="0" max="100" value="12" style="width:140px;height:4px;border-radius:2px;background:rgba(255,255,255,0.12);-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;accent-color:rgba(255,255,255,0.4)">
+                        <span id="lofiVolLabel" style="font-size:0.75rem;color:rgba(255,255,255,0.35);min-width:24px;text-align:center">12</span>
+                    </div>
+                </div>
+                <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)">
+                    <div style="margin-bottom:8px;font-size:0.8rem;color:rgba(255,255,255,0.5)">Источник музыки</div>
+                    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px">
+                        <label id="musicSrcGen" style="padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);cursor:pointer;font-size:0.75rem;transition:all 0.3s;background:rgba(255,255,255,0.08)">Lo-fi генерация</label>
+                        <label id="musicSrcFile" style="padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);cursor:pointer;font-size:0.75rem;transition:all 0.3s;background:none">Свой файл</label>
+                    </div>
+                    <div id="musicFileSection" style="display:none;text-align:center">
+                        <label for="customAudio" style="display:inline-block;padding:8px 16px;border-radius:8px;border:1px dashed rgba(255,255,255,0.2);color:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;font-size:0.75rem">
+                            Выбрать MP3 / WAV / OGG
+                            <input type="file" id="customAudio" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp3" style="display:none">
+                        </label>
+                        <div id="audioFileName" style="margin-top:6px;font-size:0.7rem;color:rgba(255,255,255,0.25)"></div>
+                    </div>
+                </div>
+
+                <!-- Формат даты -->
+                <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);text-align:center">
+                    <div style="margin-bottom:8px;font-size:0.8rem;color:rgba(255,255,255,0.5)">Формат даты</div>
+                    <div style="display:flex;gap:8px;justify-content:center">
+                        <label id="dateFmtVerbose" style="padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);cursor:pointer;font-size:0.75rem;transition:all 0.3s;background:rgba(255,255,255,0.08)">7 июля 2026</label>
+                        <label id="dateFmtShort" style="padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);cursor:pointer;font-size:0.75rem;transition:all 0.3s;background:none">07.07.2026</label>
+                    </div>
+                </div>
+
+                <!-- Мои ссылки -->
+                <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)">
+                    <div style="margin-bottom:8px;font-size:0.8rem;color:rgba(255,255,255,0.5);text-align:center">Мои ссылки</div>
+                    <div id="linksSettingsList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+                    <div style="display:flex;gap:6px">
+                        <input type="text" id="newLinkName" placeholder="Название" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:6px 8px;color:rgba(255,255,255,0.6);font-size:0.7rem;outline:none">
+                        <input type="text" id="newLinkUrl" placeholder="https://" style="flex:2;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:6px 8px;color:rgba(255,255,255,0.6);font-size:0.7rem;outline:none">
+                        <button id="addLinkBtn" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);cursor:pointer;font-size:0.8rem">+</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <audio id="customMusicAudio" loop style="display:none"></audio>
+    <div class="notes-panel" id="notesPanel">
+        <div class="notes-body">
+            <h3>Заметки</h3>
+            <div class="notes-input-row">
+                <input type="text" id="noteInput" placeholder="Задача, ссылка...">
+                <button id="addNoteBtn">+</button>
+            </div>
+            <ul id="noteList"></ul>
+            <div class="rates-section">
+                <div class="rates-grid" id="ratesGrid">
+                    <div class="rate-item"><div class="rate-pair">💵 USD/RUB</div><div class="rate-value">—</div><div class="rate-sub">₽</div></div>
+                    <div class="rate-item"><div class="rate-pair">💵 USD/UAH</div><div class="rate-value">—</div><div class="rate-sub">₴</div></div>
+                    <div class="rate-item"><div class="rate-pair">₿ BTC/USD</div><div class="rate-value">—</div><div class="rate-sub">$</div></div>
+                    <div class="rate-item"><div class="rate-pair">₽ RUB/UAH</div><div class="rate-value">—</div><div class="rate-sub">₴</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="notes-trigger" id="notesTrigger">
+        <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
 
     <!-- Наша секретная ссылка-невидимка -->
     <a id="hiddenLink" href=""></a>
 
-    <script>
-        // Скрипт для работы часов
+
+
+    <div class="easter-egg"><img alt="egg"></div>
+<script>
+        const daysOfWeek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+        const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+
+        function getGreeting(hours) {
+            if (hours >= 5 && hours < 12) return 'Доброе утро';
+            if (hours >= 12 && hours < 18) return 'Добрый день';
+            if (hours >= 18 && hours < 23) return 'Добрый вечер';
+            return 'Доброй ночи';
+        }
+
+        let dateFormat = localStorage.getItem('dateFormat') || 'verbose';
+
         function updateClock() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+
+            document.getElementById('greetingText').textContent = getGreeting(now.getHours());
+            document.getElementById('dateText').textContent = dateFormat === 'short'
+                ? `${String(now.getDate()).padStart(2,'0')}.${String(now.getMonth()+1).padStart(2,'0')}.${now.getFullYear()}`
+                : `${now.getDate()} ${months[now.getMonth()]}, ${daysOfWeek[now.getDay()]}`;
         }
         setInterval(updateClock, 1000);
         updateClock();
 
+        // Погода через wttr.in (без API-ключа)
+        const weatherRu = {
+            'clear':'Ясно','sunny':'Солнечно',
+            'partly cloudy':'Переменная облачность',
+            'cloudy':'Облачно','overcast':'Пасмурно',
+            'mist':'Туман','fog':'Туман','freezing fog':'Ледяной туман',
+            'haze':'Дымка','smoke':'Смог',
+            'patchy rain possible':'Возможен дождь',
+            'patchy snow possible':'Возможен снег',
+            'patchy sleet possible':'Возможен мокрый снег',
+            'patchy freezing drizzle possible':'Возможна ледяная морось',
+            'thundery outbreaks possible':'Возможна гроза',
+            'blowing snow':'Позёмок','blizzard':'Метель',
+            'patchy light drizzle':'Небольшая морось',
+            'light drizzle':'Морось','freezing drizzle':'Ледяная морось',
+            'heavy freezing drizzle':'Сильная ледяная морось',
+            'patchy light rain':'Небольшой дождь',
+            'light rain':'Небольшой дождь','rain':'Дождь',
+            'moderate rain at times':'Временами дождь',
+            'moderate rain':'Дождь',
+            'heavy rain at times':'Временами сильный дождь',
+            'heavy rain':'Сильный дождь',
+            'light freezing rain':'Небольшой ледяной дождь',
+            'moderate or heavy freezing rain':'Ледяной дождь',
+            'light sleet':'Небольшой мокрый снег',
+            'moderate or heavy sleet':'Мокрый снег',
+            'patchy light snow':'Небольшой снег',
+            'light snow':'Небольшой снег','snow':'Снег',
+            'patchy moderate snow':'Умеренный снег',
+            'moderate snow':'Снег',
+            'patchy heavy snow':'Сильный снегопад',
+            'heavy snow':'Сильный снегопад',
+            'ice pellets':'Ледяной дождь',
+            'light rain shower':'Небольшой ливень',
+            'moderate or heavy rain shower':'Ливень',
+            'torrential rain shower':'Проливной дождь',
+            'light sleet showers':'Небольшой мокрый снег',
+            'moderate or heavy sleet showers':'Мокрый снег',
+            'light snow showers':'Небольшой снегопад',
+            'moderate or heavy snow showers':'Снегопад',
+            'light showers of ice pellets':'Ледяной дождь',
+            'moderate or heavy showers of ice pellets':'Ледяной дождь',
+            'patchy light rain with thunder':'Дождь с грозой',
+            'moderate or heavy rain with thunder':'Гроза с дождём',
+            'patchy light snow with thunder':'Снег с грозой',
+            'moderate or heavy snow with thunder':'Снег с грозой'
+        };
+        function effectForWeather(key) {
+            if (/rain|drizzle|thunder|shower/.test(key)) return 'rain';
+            if (/snow|sleet|ice/.test(key)) return 'snow';
+            if (/clear|sunny/.test(key)) return 'sakura';
+            return 'sakura';
+        }
+
+        let manualEffect = localStorage.getItem('manualEffect') === 'true';
+
+        const weatherEmoji = {
+            'clear':'☀️','sunny':'☀️','cloudy':'☁️','partly cloudy':'⛅','overcast':'☁️',
+            'mist':'🌫️','fog':'🌫️','rain':'🌧️','light rain':'🌦️','heavy rain':'🌧️',
+            'drizzle':'🌦️','thunderstorm':'⛈️','thunder':'⛈️','snow':'❄️','light snow':'🌨️',
+            'heavy snow':'❄️','sleet':'🌨️','ice':'🧊'
+        };
+
+        function dayName(delta) {
+            const d = new Date(); d.setDate(d.getDate()+delta);
+            return d.toLocaleDateString('ru-RU', {weekday:'short'}).replace(/\.$/,'');
+        }
+
+        async function fetchWeather() {
+            try {
+                const res = await fetch('https://wttr.in/Kemerovo?format=j1');
+                const data = await res.json();
+                const c = data.current_condition[0];
+                const key = c.weatherDesc[0].value.trim().toLowerCase();
+                const desc = weatherRu[key] || c.weatherDesc[0].value.trim();
+                document.getElementById('weather').textContent = desc + ', ' + c.temp_C + '°C, Кемерово';
+                if (!manualEffect) {
+                    const autoEffect = effectForWeather(key);
+                    localStorage.setItem('effect', autoEffect);
+                    const btn = document.querySelector('.p-btn[data-p="' + autoEffect + '"]');
+                    document.querySelectorAll('.p-btn').forEach(b => b.classList.remove('active'));
+                    if (btn) btn.classList.add('active');
+                    startParticles(autoEffect);
+                }
+                // Прогноз на неделю
+                const days = data.weather.slice(1, 8);
+                const forecastEl = document.getElementById('forecast');
+                forecastEl.innerHTML = days.map((d, i) => {
+                    let wKey = '';
+                    try {
+                        const h = d.hourly.find(h => h.weatherDesc && h.weatherDesc[0] && h.weatherDesc[0].value);
+                        const src = h || d.hourly[0];
+                        if (src && src.weatherDesc && src.weatherDesc[0]) wKey = src.weatherDesc[0].value.trim().toLowerCase();
+                    } catch(e) {}
+                    const emoji = weatherEmoji[wKey] || '🌈';
+                    return '<div class="forecast-day"><span>' + dayName(i+1) + '</span><span class="f-emoji">' + emoji + '</span><span>' + d.avgtempC + '°C</span></div>';
+                }).join('');
+            } catch {
+                // ignore forecast errors
+            }
+        }
+        fetchWeather();
+
+        // Настройки — список гифок из папки gif/
+        const gifFolder = 'gif/';
+        const gifs = [
+            gifFolder + 'anime.gif',
+            gifFolder + 'bleach GIF.gif',
+            gifFolder + 'Aizen Sosuke Bleach GIF.gif',
+            gifFolder + 'Bleach Final Getsuga Tenshou GIF.gif',
+            gifFolder + 'death note japan GIF.gif',
+            gifFolder + 'death note eating GIF.gif',
+            gifFolder + 'death note GIF.gif',
+            gifFolder + 'note 5 death GIF.gif',
+            gifFolder + 'code geass GIF by Funimation.gif',
+            gifFolder + 'Без названия.gif'
+        ];
+
+        const bgEl = document.querySelector('.background');
+
+        function setBg(name) {
+            const url = 'url("' + encodeURI(name) + '")';
+            bgEl.style.background = url + ' no-repeat center center/cover';
+            localStorage.setItem('startBg', name);
+            document.querySelectorAll('.gif-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.gif === name);
+            });
+        }
+
+        // Загружаем сохранённый фон
+        let saved = localStorage.getItem('startBg');
+        if (saved) {
+            // Миграция старых сохранений без префикса gif/
+            if (!saved.startsWith('data:') && !saved.startsWith(gifFolder) && !saved.startsWith('http')) {
+                saved = gifFolder + saved;
+                localStorage.setItem('startBg', saved);
+            }
+            if (gifs.includes(saved)) setBg(saved);
+            else if (saved.startsWith('data:')) {
+                bgEl.style.background = 'url("' + saved + '") no-repeat center center/cover';
+            }
+        }
+
+        // Строим сетку превью
+        const grid = document.getElementById('gifGrid');
+        gifs.forEach(name => {
+            const item = document.createElement('div');
+            item.className = 'gif-item';
+            item.dataset.gif = name;
+            if (name === (localStorage.getItem('startBg') || gifFolder + 'anime.gif')) item.classList.add('active');
+            const img = document.createElement('img');
+            img.src = encodeURI(name);
+            img.loading = 'lazy';
+            img.alt = name;
+            item.appendChild(img);
+            item.addEventListener('click', () => setBg(name));
+            grid.appendChild(item);
+        });
+
+        // Загрузка своей гифки с ПК
+        document.getElementById('customGif').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const dataUrl = ev.target.result;
+                if (dataUrl.length > 5000000) {
+                    alert('Файл слишком большой (макс 5MB)');
+                    return;
+                }
+                const prev = document.getElementById('customPreview');
+                document.getElementById('customPreviewImg').src = dataUrl;
+                prev.style.display = 'block';
+                bgEl.style.background = 'url("' + dataUrl + '") no-repeat center center/cover';
+                localStorage.setItem('startBg', dataUrl);
+                document.querySelectorAll('.gif-item').forEach(el => el.classList.remove('active'));
+            };
+            reader.readAsDataURL(file);
+            this.value = '';
+        });
+
+        // Частицы — движок
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        let particles = [], animId, currentEffect = 'off';
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Petal {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.w = 6 + Math.random() * 8;
+                this.h = 3 + Math.random() * 4;
+                this.speedY = 0.8 + Math.random() * 1.2;
+                this.speedX = -0.3 + Math.random() * 0.6;
+                this.rot = Math.random() * Math.PI * 2;
+                this.rotSpeed = (Math.random() - 0.5) * 0.03;
+                this.alpha = 0.4 + Math.random() * 0.4;
+                this.swayAmp = 0.5 + Math.random() * 1;
+                this.swaySpeed = 0.01 + Math.random() * 0.02;
+                this.phase = Math.random() * Math.PI * 2;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX + Math.sin(this.phase += this.swaySpeed) * this.swayAmp;
+                this.rot += this.rotSpeed;
+                if (this.y > canvas.height + 20) this.reset();
+                if (this.x < -20) this.x = canvas.width + 20;
+                if (this.x > canvas.width + 20) this.x = -20;
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rot);
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = '#f0b8c8';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, this.w / 2, this.h / 2, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#e8a0b4';
+                ctx.beginPath();
+                ctx.ellipse(-1, 0, this.w / 4, this.h / 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        class Raindrop {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.len = 8 + Math.random() * 14;
+                this.speed = 4 + Math.random() * 6;
+                this.opacity = 0.2 + Math.random() * 0.3;
+            }
+            update() {
+                this.y += this.speed;
+                if (this.y > canvas.height + 10) this.reset();
+            }
+            draw() {
+                ctx.strokeStyle = 'rgba(180,210,255,' + this.opacity + ')';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x - 1, this.y - this.len);
+                ctx.stroke();
+            }
+        }
+
+        class Snowflake {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.r = 2 + Math.random() * 4;
+                this.speedY = 0.5 + Math.random() * 1.2;
+                this.speedX = -0.3 + Math.random() * 0.6;
+                this.alpha = 0.4 + Math.random() * 0.5;
+                this.swayAmp = 0.3 + Math.random() * 0.8;
+                this.swaySpeed = 0.01 + Math.random() * 0.02;
+                this.phase = Math.random() * Math.PI * 2;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += Math.sin(this.phase += this.swaySpeed) * this.swayAmp;
+                if (this.y > canvas.height + 10) this.reset();
+                if (this.x < -10) this.x = canvas.width + 10;
+                if (this.x > canvas.width + 10) this.x = -10;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,' + this.alpha + ')';
+                ctx.fill();
+            }
+        }
+
+        class Ash {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 10 + Math.random() * 30;
+                this.r = 2 + Math.random() * 5;
+                this.speedY = -0.3 - Math.random() * 0.8;
+                this.speedX = -0.4 + Math.random() * 0.8;
+                this.alpha = 0.7 + Math.random() * 0.3;
+                this.life = 1;
+                this.swayAmp = 0.3 + Math.random() * 0.6;
+                this.swaySpeed = 0.01 + Math.random() * 0.03;
+                this.phase = Math.random() * Math.PI * 2;
+                this.hue = 15 + Math.random() * 25;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += Math.sin(this.phase += this.swaySpeed) * this.swayAmp;
+                this.life -= 0.003;
+                if (this.life <= 0 || this.y < -20) this.reset();
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.life * this.alpha;
+                const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 2);
+                grad.addColorStop(0, 'hsla(' + this.hue + ',100%,70%,0.9)');
+                grad.addColorStop(0.5, 'hsla(' + this.hue + ',100%,50%,0.5)');
+                grad.addColorStop(1, 'hsla(' + this.hue + ',100%,30%,0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r * 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Мышь для интерактивных эффектов
+        let mouseX = -9999, mouseY = -9999;
+        document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+        document.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
+
+        class NeonSpark {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -canvas.height * 0.2 + Math.random() * canvas.height;
+                this.speedY = 0.5 + Math.random() * 1;
+                this.speedX = -0.3 + Math.random() * 0.6;
+                this.alpha = 0.5 + Math.random() * 0.4;
+                this.r = 1.5 + Math.random() * 2.5;
+                this.hue = 260 + Math.random() * 60;
+                this.swayAmp = 0.3 + Math.random() * 0.6;
+                this.swaySpeed = 0.01 + Math.random() * 0.03;
+                this.phase = Math.random() * Math.PI * 2;
+            }
+            update() {
+                const dx = this.x - mouseX, dy = this.y - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 120) {
+                    const force = (120 - dist) / 120 * 2;
+                    this.speedX += (dx / dist || 0) * force * 0.15;
+                    this.speedY += (dy / dist || 0) * force * 0.15;
+                }
+                this.y += this.speedY;
+                this.x += this.speedX + Math.sin(this.phase += this.swaySpeed) * this.swayAmp;
+                this.speedX *= 0.98;
+                this.speedY *= 0.98;
+                if (this.y > canvas.height + 15) this.reset();
+                if (this.x < -10) this.x = canvas.width + 10;
+                if (this.x > canvas.width + 10) this.x = -10;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 4);
+                grad.addColorStop(0, 'hsla(' + this.hue + ',100%,75%,1)');
+                grad.addColorStop(0.3, 'hsla(' + this.hue + ',100%,60%,0.6)');
+                grad.addColorStop(1, 'hsla(' + this.hue + ',100%,50%,0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r * 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        class AshParticle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -canvas.height * 0.2 + Math.random() * canvas.height;
+                this.r = 2 + Math.random() * 4;
+                this.speedY = 0.3 + Math.random() * 0.8;
+                this.speedX = -0.2 + Math.random() * 0.4;
+                this.alpha = 0.5 + Math.random() * 0.4;
+                this.swayAmp = 0.3 + Math.random() * 0.6;
+                this.swaySpeed = 0.008 + Math.random() * 0.02;
+                this.phase = Math.random() * Math.PI * 2;
+            }
+            update() {
+                const dx = this.x - mouseX, dy = this.y - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 100) {
+                    const force = (100 - dist) / 100 * 1.5;
+                    this.speedX += (dx / dist || 0) * force * 0.1;
+                    this.speedY += (dy / dist || 0) * force * 0.1;
+                }
+                this.y += this.speedY;
+                this.x += this.speedX + Math.sin(this.phase += this.swaySpeed) * this.swayAmp;
+                this.speedX *= 0.98;
+                this.speedY *= 0.98;
+                if (this.y > canvas.height + 10) this.reset();
+                if (this.x < -10) this.x = canvas.width + 10;
+                if (this.x > canvas.width + 10) this.x = -10;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(160,150,160,' + this.alpha + ')';
+                ctx.fill();
+            }
+        }
+
+        // Звуковой движок
+        let audioCtx = null;
+        let masterGain = null;
+        let currentSound = null;
+        let muted = localStorage.getItem('muted') === 'true';
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = muted ? 0 : effectsVolume / 100 * 0.3;
+                masterGain.connect(audioCtx.destination);
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function stopSounds() {
+            if (currentSound) {
+                try { clearInterval(currentSound.__crackleTimer); } catch(e) {}
+                try { currentSound.stop(); } catch(e) {}
+                try { currentSound.disconnect(); } catch(e) {}
+                currentSound = null;
+            }
+        }
+
+        function startSounds(type) {
+            stopSounds();
+            if (muted || type === 'off') return;
+            initAudio();
+            if (!audioCtx) return;
+
+            let src = null;
+            if (type === 'rain') {
+                const bufSize = audioCtx.sampleRate * 4;
+                const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * 0.12;
+                src = audioCtx.createBufferSource();
+                src.buffer = buf; src.loop = true;
+                const filt = audioCtx.createBiquadFilter();
+                filt.type = 'lowpass'; filt.frequency.value = 2500;
+                src.connect(filt).connect(masterGain);
+                currentSound = src;
+            } else if (type === 'sakura') {
+                const bufSize = audioCtx.sampleRate * 4;
+                const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * 0.03;
+                src = audioCtx.createBufferSource();
+                src.buffer = buf; src.loop = true;
+                const filt = audioCtx.createBiquadFilter();
+                filt.type = 'lowpass'; filt.frequency.value = 600;
+                src.connect(filt).connect(masterGain);
+                currentSound = src;
+            } else if (type === 'snow') {
+                const bufSize = audioCtx.sampleRate * 4;
+                const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * 0.04;
+                src = audioCtx.createBufferSource();
+                src.buffer = buf; src.loop = true;
+                const filt = audioCtx.createBiquadFilter();
+                filt.type = 'lowpass'; filt.frequency.value = 1200;
+                src.connect(filt).connect(masterGain);
+                currentSound = src;
+            } else if (type === 'ash') {
+                // База: низкочастотный гул (бурый шум)
+                const bufSize = audioCtx.sampleRate * 6;
+                const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+                const d = buf.getChannelData(0);
+                let last = 0;
+                for (let i = 0; i < bufSize; i++) {
+                    last = last * 0.98 + (Math.random() * 2 - 1) * 0.02;
+                    d[i] = last * 0.15;
+                }
+                src = audioCtx.createBufferSource();
+                src.buffer = buf; src.loop = true;
+                const baseFilt = audioCtx.createBiquadFilter();
+                baseFilt.type = 'lowpass'; baseFilt.frequency.value = 350;
+                const baseGain = audioCtx.createGain();
+                baseGain.gain.value = 0.15;
+                src.connect(baseFilt).connect(baseGain).connect(masterGain);
+                currentSound = src;
+
+                // Треск: случайные короткие всплески высоких частот
+                let crackleTimer = setInterval(() => {
+                    if (!audioCtx || muted) return;
+                    const count = 1 + Math.floor(Math.random() * 3);
+                    for (let i = 0; i < count; i++) {
+                        const delay = Math.random() * 0.2;
+                        const t = audioCtx.currentTime + delay;
+                        const dur = 0.02 + Math.random() * 0.06;
+                        const buf2 = audioCtx.createBuffer(1, audioCtx.sampleRate * dur, audioCtx.sampleRate);
+                        const d2 = buf2.getChannelData(0);
+                        for (let j = 0; j < d2.length; j++) d2[j] = (Math.random() * 2 - 1) * 0.4;
+                        const crack = audioCtx.createBufferSource();
+                        crack.buffer = buf2;
+                        const f2 = audioCtx.createBiquadFilter();
+                        f2.type = 'bandpass'; f2.frequency.value = 2000 + Math.random() * 4000; f2.Q.value = 2;
+                        const g2 = audioCtx.createGain();
+                        g2.gain.setValueAtTime(0.08 + Math.random() * 0.12, t);
+                        g2.gain.exponentialRampToValueAtTime(0.001, t + dur);
+                        crack.connect(f2).connect(g2).connect(masterGain);
+                        crack.start(t); crack.stop(t + dur + 0.01);
+                    }
+                }, 300 + Math.random() * 400);
+                // Сохраняем таймер для очистки
+                currentSound.__crackleTimer = crackleTimer;
+            } else if (type === 'neon') {
+                const bufSize = audioCtx.sampleRate * 3;
+                const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < bufSize; i++) {
+                    const t = i / audioCtx.sampleRate;
+                    d[i] = (Math.random() * 2 - 1) * (0.04 + Math.sin(t * 0.7) * 0.03);
+                }
+                src = audioCtx.createBufferSource();
+                src.buffer = buf; src.loop = true;
+                const filt = audioCtx.createBiquadFilter();
+                filt.type = 'lowpass'; filt.frequency.value = 2000;
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0.15;
+                src.connect(filt).connect(gain).connect(masterGain);
+                currentSound = src;
+            } else if (type === 'ashpetal') {
+                const bufSize = audioCtx.sampleRate * 4;
+                const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < bufSize; i++) {
+                    const t = i / audioCtx.sampleRate;
+                    d[i] = (Math.random() * 2 - 1) * (0.03 + Math.sin(t * 0.3) * 0.04 + Math.sin(t * 1.1) * 0.02);
+                }
+                src = audioCtx.createBufferSource();
+                src.buffer = buf; src.loop = true;
+                src.playbackRate.value = 0.3;
+                const filt = audioCtx.createBiquadFilter();
+                filt.type = 'lowpass'; filt.frequency.value = 300;
+                const filt2 = audioCtx.createBiquadFilter();
+                filt2.type = 'highpass'; filt2.frequency.value = 60;
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0.2;
+                src.connect(filt).connect(filt2).connect(gain).connect(masterGain);
+                currentSound = src;
+            }
+            if (src) src.start();
+        }
+
+        function stopParticles() {
+            if (animId) { cancelAnimationFrame(animId); animId = null; }
+            particles = [];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stopSounds();
+        }
+
+        function startParticles(type) {
+            stopParticles();
+            if (type === 'off') { currentEffect = 'off'; return; }
+            currentEffect = type;
+            const classes = { sakura: Petal, rain: Raindrop, snow: Snowflake, ash: Ash, neon: NeonSpark, ashpetal: AshParticle };
+            const counts = { sakura: 40, rain: 120, snow: 80, ash: 35, neon: 50, ashpetal: 60 };
+            const Cls = classes[type];
+            for (let i = 0; i < counts[type]; i++) particles.push(new Cls());
+            startSounds(type);
+
+            function loop() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => { p.update(); p.draw(); });
+                animId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        // Громкость эффектов
+        let effectsVolume = +(localStorage.getItem('effectsVolume') || 30);
+
+        // Загружаем сохранённый эффект
+        const savedEffect = localStorage.getItem('effect') || 'sakura';
+        startParticles(savedEffect);
+
+        // Кнопки выбора эффекта в настройках
+        document.querySelectorAll('.p-btn').forEach(btn => {
+            if (btn.dataset.p === savedEffect) btn.classList.add('active');
+            btn.addEventListener('click', () => {
+                manualEffect = true;
+                localStorage.setItem('manualEffect', 'true');
+                document.querySelectorAll('.p-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const type = btn.dataset.p;
+                startParticles(type);
+                localStorage.setItem('effect', type);
+            });
+        });
+
+        // Ползунок громкости эффектов
+        const effectsSlider = document.getElementById('effectsVolume');
+        const effectsLabel = document.getElementById('effectsVolLabel');
+        if (effectsSlider) {
+            effectsSlider.value = effectsVolume;
+            effectsLabel.textContent = effectsVolume;
+            effectsSlider.addEventListener('input', () => {
+                effectsVolume = +effectsSlider.value;
+                effectsLabel.textContent = effectsVolume;
+                localStorage.setItem('effectsVolume', effectsVolume);
+                if (!muted && masterGain) masterGain.gain.value = effectsVolume / 100 * 0.3;
+            });
+        }
+
+        // Кнопка отключения звука
+        function updateMuteUI() {
+            document.getElementById('muteIcon').textContent = muted ? '🔇' : '🔊';
+            document.getElementById('muteLabel').textContent = muted ? 'Звук выкл' : 'Звук вкл';
+        }
+        updateMuteUI();
+        document.getElementById('muteBtn').addEventListener('click', () => {
+            muted = !muted;
+            localStorage.setItem('muted', muted);
+            updateMuteUI();
+            if (masterGain) masterGain.gain.value = muted ? 0 : effectsVolume / 100 * 0.3;
+            if (lofiGain) lofiGain.gain.value = muted ? 0 : lofiVolume / 100 * 0.3;
+            customAudio.volume = muted ? 0 : lofiVolume / 100 * 0.3;
+            if (!muted && !currentSound && currentEffect !== 'off') {
+                startSounds(currentEffect);
+            }
+        });
+
+
+
+        // Lo-fi музыка — генерация через Web Audio API
+        let musicPlaying = false;
+        let lofiGain = null;
+        let lofiTimer = null;
+        let chordsTimer = null;
+        let chordGains = [];
+
+        function noiseBuf(ctx, dur) {
+            const b = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+            const d = b.getChannelData(0);
+            for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+            return b;
+        }
+
+        function kick(ctx, t, dest) {
+            const o = ctx.createOscillator(); o.type = 'sine';
+            o.frequency.setValueAtTime(200, t); o.frequency.exponentialRampToValueAtTime(35, t + 0.1);
+            const g = ctx.createGain(); g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+            o.connect(g).connect(dest); o.start(t); o.stop(t + 0.25);
+        }
+
+        function snare(ctx, t, dest) {
+            const s = ctx.createBufferSource(); s.buffer = noiseBuf(ctx, 0.2);
+            const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 180; f.Q.value = 0.7;
+            const g = ctx.createGain(); g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+            s.connect(f).connect(g).connect(dest); s.start(t); s.stop(t + 0.25);
+        }
+
+        function hat(ctx, t, dest) {
+            const s = ctx.createBufferSource(); s.buffer = noiseBuf(ctx, 0.05);
+            const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 9000;
+            const g = ctx.createGain(); g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+            s.connect(f).connect(g).connect(dest); s.start(t); s.stop(t + 0.1);
+        }
+
+        function startChords(ctx, dest) {
+            const prog = [
+                [262,330,392,494],[220,262,330,392],
+                [349,440,524,659],[392,494,587,740],
+                [262,330,392,494],[220,262,330,392]
+            ];
+            const durs = [2,2,1.5,1.5,1,1];
+            let off = 0;
+            function next() {
+                if (!musicPlaying) return;
+                const i = Math.floor(off / 4) % prog.length;
+                const t = ctx.currentTime;
+                chordGains.forEach(g => { try { g.gain.setValueAtTime(g.gain.value, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.3); } catch {} });
+                chordGains = [];
+                prog[i].forEach(freq => {
+                    const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = freq;
+                    const g = ctx.createGain(); g.gain.setValueAtTime(0, t);
+                    g.gain.linearRampToValueAtTime(0.06, t + 0.1);
+                    g.gain.setValueAtTime(0.06, t + durs[i] - 0.2);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + durs[i]);
+                    const flt = ctx.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = 1000;
+                    o.connect(g).connect(flt).connect(dest);
+                    o.start(t); o.stop(t + durs[i] + 0.1);
+                    chordGains.push(g);
+                });
+                off += durs[i];
+                chordsTimer = setTimeout(next, Math.max(50, durs[i] * 250 - (ctx.currentTime - t) * 1000));
+            }
+            next();
+        }
+
+        function startLofi() {
+            initAudio();
+            lofiGain = audioCtx.createGain(); lofiGain.gain.value = lofiVolume / 100 * 0.3;
+            lofiGain.connect(audioCtx.destination);
+
+            const bpm = 82, step = 60 / bpm / 4;
+            let beat = 0;
+            function loop() {
+                if (!musicPlaying) return;
+                const t = audioCtx.currentTime;
+                const k = [1,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,1,0];
+                const s = [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0];
+                const h = [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0];
+                for (let i = 0; i < 8; i++) {
+                    const p = (beat + i) % 16;
+                    if (k[p]) kick(audioCtx, t + i * step, lofiGain);
+                    if (s[p]) snare(audioCtx, t + i * step, lofiGain);
+                    if (h[p]) hat(audioCtx, t + i * step, lofiGain);
+                }
+                beat = (beat + 8) % 16;
+                lofiTimer = setTimeout(loop, step * 8 * 1000 - 50);
+            }
+            startChords(audioCtx, lofiGain);
+            loop();
+        }
+
+        function stopLofi() {
+            clearTimeout(lofiTimer); clearTimeout(chordsTimer);
+            chordGains.forEach(g => { try { const t = audioCtx.currentTime; g.gain.setValueAtTime(g.gain.value, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.2); } catch {} });
+            chordGains = [];
+            if (lofiGain) try { lofiGain.gain.value = 0; } catch {}
+        }
+
+        // Громкость лоуфая
+        const lofiVolumeSlider = document.getElementById('lofiVolume');
+        const lofiVolLabel = document.getElementById('lofiVolLabel');
+        let lofiVolume = +(localStorage.getItem('lofiVolume') || 12);
+        lofiVolumeSlider.value = lofiVolume;
+        lofiVolLabel.textContent = lofiVolume;
+        lofiVolumeSlider.addEventListener('input', () => {
+            lofiVolume = +lofiVolumeSlider.value;
+            lofiVolLabel.textContent = lofiVolume;
+            localStorage.setItem('lofiVolume', lofiVolume);
+            if (lofiGain) lofiGain.gain.value = lofiVolume / 100 * 0.3;
+            customAudio.volume = lofiVolume / 100 * 0.3;
+        });
+
+        // Пользовательская музыка (файл или генерация)
+        const customAudio = document.getElementById('customMusicAudio');
+        let useCustomAudio = localStorage.getItem('useCustomAudio') === 'true';
+        const musicSrcGen = document.getElementById('musicSrcGen');
+        const musicSrcFile = document.getElementById('musicSrcFile');
+        const musicFileSection = document.getElementById('musicFileSection');
+        const audioFileName = document.getElementById('audioFileName');
+
+        function applyMusicSrcUI() {
+            musicSrcGen.style.background = useCustomAudio ? 'none' : 'rgba(255,255,255,0.08)';
+            musicSrcGen.style.borderColor = useCustomAudio ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.15)';
+            musicSrcGen.style.color = useCustomAudio ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)';
+            musicSrcFile.style.background = useCustomAudio ? 'rgba(255,255,255,0.08)' : 'none';
+            musicSrcFile.style.borderColor = useCustomAudio ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.1)';
+            musicSrcFile.style.color = useCustomAudio ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.3)';
+            musicFileSection.style.display = useCustomAudio ? 'block' : 'none';
+        }
+        applyMusicSrcUI();
+
+        musicSrcGen.addEventListener('click', () => {
+            useCustomAudio = false;
+            localStorage.setItem('useCustomAudio', 'false');
+            applyMusicSrcUI();
+            if (musicPlaying) { stopLofi(); if (customAudio.src) { customAudio.pause(); } musicPlaying = false; document.getElementById('musicBtn').classList.remove('playing'); }
+        });
+        musicSrcFile.addEventListener('click', () => {
+            useCustomAudio = true;
+            localStorage.setItem('useCustomAudio', 'true');
+            applyMusicSrcUI();
+            if (musicPlaying) { stopLofi(); if (customAudio.src) { customAudio.pause(); } musicPlaying = false; document.getElementById('musicBtn').classList.remove('playing'); }
+        });
+
+        // Загрузка аудиофайла
+        const audioDataUrl = localStorage.getItem('customAudioData');
+        if (audioDataUrl) {
+            customAudio.src = audioDataUrl;
+            audioFileName.textContent = localStorage.getItem('customAudioName') || 'Файл загружен';
+        }
+        document.getElementById('customAudio').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) { audioFileName.textContent = 'Файл слишком большой (макс 5МБ)'; return; }
+            audioFileName.textContent = file.name + ' (' + Math.round(file.size / 1024) + 'KB)';
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const dataUrl = ev.target.result;
+                try {
+                    localStorage.setItem('customAudioData', dataUrl);
+                    localStorage.setItem('customAudioName', file.name);
+                    customAudio.src = dataUrl;
+                } catch (e) { audioFileName.textContent = 'Ошибка сохранения'; }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Кнопка музыки: генерация или файл
+        document.getElementById('musicBtn').addEventListener('click', () => {
+            musicPlaying = !musicPlaying;
+            document.getElementById('musicBtn').classList.toggle('playing', musicPlaying);
+            if (musicPlaying) {
+                if (useCustomAudio && customAudio.src) {
+                    stopLofi();
+                    customAudio.volume = lofiVolume / 100 * 0.3;
+                    customAudio.play().catch(() => {});
+                } else {
+                    customAudio.pause();
+                    startLofi();
+                }
+            } else {
+                if (useCustomAudio && customAudio.src) customAudio.pause();
+                else stopLofi();
+            }
+        });
+
+        // Формат даты
+        function applyDateFormatUI() {
+            const verbose = dateFormat === 'verbose';
+            document.getElementById('dateFmtVerbose').style.background = verbose ? 'rgba(255,255,255,0.08)' : 'none';
+            document.getElementById('dateFmtVerbose').style.borderColor = verbose ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.1)';
+            document.getElementById('dateFmtVerbose').style.color = verbose ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.3)';
+            document.getElementById('dateFmtShort').style.background = verbose ? 'none' : 'rgba(255,255,255,0.08)';
+            document.getElementById('dateFmtShort').style.borderColor = verbose ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.15)';
+            document.getElementById('dateFmtShort').style.color = verbose ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)';
+        }
+        applyDateFormatUI();
+        document.getElementById('dateFmtVerbose').addEventListener('click', () => {
+            dateFormat = 'verbose'; localStorage.setItem('dateFormat', 'verbose');
+            applyDateFormatUI(); updateClock();
+        });
+        document.getElementById('dateFmtShort').addEventListener('click', () => {
+            dateFormat = 'short'; localStorage.setItem('dateFormat', 'short');
+            applyDateFormatUI(); updateClock();
+        });
+
+        // Мои ссылки
+        const linksKey = 'startLinks';
+        function loadLinks() {
+            try { return JSON.parse(localStorage.getItem(linksKey)) || [{n:'Steam',u:'https://steampowered.com'},{n:'YouTube',u:'https://youtube.com'},{n:'GitHub',u:'https://github.com'}]; } catch { return []; }
+        }
+        function saveLinks(links) { try { localStorage.setItem(linksKey, JSON.stringify(links)); } catch {} }
+        function renderLinks() {
+            const links = loadLinks();
+            // Основные иконки
+            document.getElementById('linksContainer').innerHTML = links.map(l => {
+                const domain = l.u.match(/https?:\/\/([^\/]+)/)?.[1] || '';
+                return `<a href="${l.u}" title="${l.n}" target="_blank"><span class="link-icon"><img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" onerror="this.style.display='none';this.parentElement.querySelector('.l-fall').style.display='flex'" alt=""><span class="l-fall" style="display:none">${l.n[0]}</span></span></a>`;
+            }).join('');
+            // Список в настройках
+            document.getElementById('linksSettingsList').innerHTML = links.map((l, i) =>
+                `<div class="link-settings-row">
+                    <span class="link-name">${l.n}</span>
+                    <span class="link-url">${l.u}</span>
+                    <button class="link-del" data-i="${i}">×</button>
+                </div>`
+            ).join('');
+            document.querySelectorAll('.link-del').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const links = loadLinks();
+                    links.splice(+btn.dataset.i, 1);
+                    saveLinks(links);
+                    renderLinks();
+                });
+            });
+        }
+        renderLinks();
+        document.getElementById('addLinkBtn').addEventListener('click', () => {
+            const name = document.getElementById('newLinkName').value.trim();
+            const url = document.getElementById('newLinkUrl').value.trim();
+            if (!name || !url) return;
+            const links = loadLinks();
+            links.push({n:name, u:url});
+            saveLinks(links);
+            renderLinks();
+            document.getElementById('newLinkName').value = '';
+            document.getElementById('newLinkUrl').value = '';
+        });
+        document.getElementById('newLinkUrl').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('addLinkBtn').click(); });
+
+        // Заметки
+        const notesKey = 'startNotes';
+        function loadNotes() {
+            try { return JSON.parse(localStorage.getItem(notesKey)) || []; } catch { return []; }
+        }
+        function saveNotes(notes) {
+            try { localStorage.setItem(notesKey, JSON.stringify(notes)); } catch {}
+        }
+        let dragIndex = null;
+        function renderNotes() {
+            const ul = document.getElementById('noteList');
+            const notes = loadNotes();
+            ul.innerHTML = notes.map((n, i) =>
+                `<li draggable="true" data-i="${i}"><span class="note-text">${n.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')}</span><button class="note-del" data-i="${i}">×</button></li>`
+            ).join('');
+            ul.querySelectorAll('.note-del').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const notes = loadNotes();
+                    notes.splice(+btn.dataset.i, 1);
+                    saveNotes(notes);
+                    renderNotes();
+                });
+            });
+            // Drag-n-drop
+            ul.querySelectorAll('li[draggable]').forEach(li => {
+                li.addEventListener('dragstart', e => {
+                    dragIndex = +li.dataset.i;
+                    li.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                li.addEventListener('dragend', () => li.classList.remove('dragging'));
+                li.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+                li.addEventListener('dragenter', () => li.classList.add('drag-over'));
+                li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
+                li.addEventListener('drop', e => {
+                    e.preventDefault();
+                    li.classList.remove('drag-over');
+                    if (dragIndex === null) return;
+                    const notes = loadNotes();
+                    const targetIndex = +li.dataset.i;
+                    if (dragIndex === targetIndex) return;
+                    const [item] = notes.splice(dragIndex, 1);
+                    notes.splice(targetIndex, 0, item);
+                    saveNotes(notes);
+                    renderNotes();
+                    dragIndex = null;
+                });
+            });
+        }
+        renderNotes();
+        const noteInp = document.getElementById('noteInput');
+        const addBtn = document.getElementById('addNoteBtn');
+        function addNote() {
+            const text = noteInp.value.trim();
+            if (!text) return;
+            const items = loadNotes();
+            items.push(text);
+            saveNotes(items);
+            renderNotes();
+            noteInp.value = '';
+            noteInp.focus();
+            if (text.includes('333')) easterEgg('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTt6POGYUorrLfX6x9suR7rIR_UTos7zI6bBFiAH_I35GQD-NGAoF8XxNHz&s=10');
+            if (text.includes('1488')) easterEgg('https://s1.15min.lt/static/cache/OTcweDU4MCwzNzR4MTIyLDU5NzI2MSxvcmlnaW5hbCwsaWQ9MTI3MDE2JmRhdGU9MjAwOSUyRjExJTJGMjEsMjAzMDU4MjU2Mw==/1258839524adolfashitleris.jpg');
+        }
+        if (addBtn) addBtn.addEventListener('click', addNote);
+        if (noteInp) noteInp.addEventListener('keydown', e => { if (e.key === 'Enter') addNote(); });
+
+        // Панель заметок — выезд
+        if (localStorage.getItem('notesPanelOpen') === 'true') {
+            document.getElementById('notesPanel').classList.add('open');
+        }
+        document.getElementById('notesTrigger').addEventListener('click', () => {
+            const panel = document.getElementById('notesPanel');
+            panel.classList.toggle('open');
+            localStorage.setItem('notesPanelOpen', panel.classList.contains('open'));
+        });
+
+        // Курсы валют и крипты
+        async function fetchRates() {
+            try {
+                const [fxRes, cryptoRes] = await Promise.all([
+                    fetch('https://api.exchangerate-api.com/v4/latest/USD'),
+                    fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd')
+                ]);
+                const fx = await fxRes.json();
+                const crypto = await cryptoRes.json();
+                const rub = fx.rates.RUB;
+                const uah = fx.rates.UAH;
+                document.querySelector('#ratesGrid .rate-item:nth-child(1) .rate-value').textContent = rub.toFixed(2);
+                document.querySelector('#ratesGrid .rate-item:nth-child(2) .rate-value').textContent = uah.toFixed(2);
+                if (crypto.bitcoin) {
+                    document.querySelector('#ratesGrid .rate-item:nth-child(3) .rate-value').textContent = '$' + crypto.bitcoin.usd.toLocaleString();
+                }
+                document.querySelector('#ratesGrid .rate-item:nth-child(4) .rate-value').textContent = (uah / rub).toFixed(4);
+            } catch {}
+        }
+        fetchRates();
+        setInterval(fetchRates, 120000);
+
+
+
+        // Открыть/закрыть настройки
+        const overlay = document.getElementById('settingsOverlay');
+        document.getElementById('settingsBtn').addEventListener('click', () => overlay.classList.add('open'));
+        document.getElementById('settingsClose').addEventListener('click', () => overlay.classList.remove('open'));
+        overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+
+        // Три точки печатаются после "Google" при наведении
+        const searchInput = document.getElementById('searchInput');
+        const basePlaceholder = 'Поиск в Google';
+        let dotsTimer = null;
+        searchInput.addEventListener('mouseenter', () => {
+            let c = 0;
+            dotsTimer = setInterval(() => {
+                searchInput.placeholder = basePlaceholder + '.'.repeat((c % 3) + 1);
+                c++;
+            }, 400);
+        });
+        searchInput.addEventListener('mouseleave', () => {
+            clearInterval(dotsTimer);
+            searchInput.placeholder = basePlaceholder + '...';
+        });
+
         // Перехват Enter и клик по чистой ссылке (в этой же вкладке)
+        function easterEgg(url) {
+            const el = document.querySelector('.easter-egg');
+            el.querySelector('img').src = url;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 3000);
+        }
+
         document.getElementById('searchInput').addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
                 const query = this.value.trim();
                 if (query !== "") {
                     const link = document.getElementById('hiddenLink');
                     // Генерируем чистую ссылку на результаты
-                    link.href = "https://google.com" + encodeURIComponent(query);
+                    link.href = "https://www.google.com/search?q=" + encodeURIComponent(query);
                     // Имитируем физический клик пользователя по ссылке
                     link.click();
                 }
