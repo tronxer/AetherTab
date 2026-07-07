@@ -528,15 +528,6 @@
         .shorts-like { bottom: 16px; right: 16px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
         .shorts-like span { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
         .shorts-like.liked svg { color: #ff4d4d; }
-        .shorts-nav {
-            position: absolute; z-index: 2; cursor: pointer; opacity: 0; transition: opacity 0.3s;
-            top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.6);
-            filter: drop-shadow(0 0 4px rgba(0,0,0,0.5));
-        }
-        .shorts-nav svg { width: 32px; height: 32px; }
-        .shorts-frame:hover .shorts-nav { opacity: 1; }
-        #shortsPrev { left: 4px; }
-        .shorts-nav-next { right: 4px; }
         .shorts-title {
             position: absolute; z-index: 2; bottom: 60px; left: 16px; right: 60px;
             font-size: 0.7rem; color: rgba(255,255,255,0.5); line-height: 1.2;
@@ -769,8 +760,6 @@
                     <span id="shortsLikeCount"></span>
                 </div>
                 <div class="shorts-title" id="shortsTitle"></div>
-                <div class="shorts-nav" id="shortsPrev"><svg viewBox="0 0 24 24"><path d="M7 6v12h2V6H7zm10 0l-6 6 6 6V6z" fill="currentColor"/></svg></div>
-                <div class="shorts-nav shorts-nav-next" id="shortsNext"><svg viewBox="0 0 24 24"><path d="M17 6v12h-2V6h2zm-10 0l6 6-6 6V6z" fill="currentColor"/></svg></div>
             </div>
         </div>
     </div>
@@ -786,7 +775,7 @@
             </div>
             <ul id="noteList"></ul>
             <div class="rates-section">
-                <img class="dviguha-img" src="Dviguha.png" alt="движуха">
+                <img class="dviguha-img" src="gif/Dviguha.png" alt="движуха">
                 <div class="war-counter" id="warCounter">Загрузка...</div>
                 <div class="rates-grid" id="ratesGrid">
                     <div class="rate-item"><div class="rate-pair">💵 USD/RUB</div><div class="rate-value">—</div><div class="rate-sub">₽</div></div>
@@ -1826,12 +1815,27 @@
             try {
                 const r = await fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&maxResults=20&regionCode=RU&key=' + key);
                 const d = await r.json();
+                if (d.error) { console.warn('YouTube API error:', d.error); return; }
                 if (d.items && d.items.length > 2) {
                     const ids = d.items.map(v => v.id.videoId).filter(Boolean).sort(() => Math.random() - 0.5);
                     shortsList = ['2cllnp5cE0o', ...ids];
                     localStorage.setItem('shortsCache', JSON.stringify(shortsList));
+                    shortsIdx = 0;
+                    if (shortsReady) playCurrent();
                 }
-            } catch {}
+            } catch(e) { console.warn('fetchShorts fail:', e); }
+        }
+        function playCurrent() {
+            if (!shortsReady) return;
+            shortsPlayer.loadVideoById(shortsList[shortsIdx]);
+            shortsPlayer.setVolume(100);
+            shortsPlayer[shortsMuted ? 'mute' : 'unMute']();
+            updateShortsUI();
+            fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=' + shortsList[shortsIdx] + '&format=json')
+                .then(r => r.json()).then(d => {
+                    const el = document.getElementById('shortsTitle');
+                    if (el) el.textContent = d.title || '';
+                }).catch(() => {});
         }
 
         function loadShorts(autoplay) {
@@ -1847,6 +1851,7 @@
                     if (el) el.textContent = d.title || '';
                 }).catch(() => {});
         }
+
         function toggleShortsMute() {
             if (!shortsReady) return;
             if (shortsPlayer.isMuted()) { shortsPlayer.unMute(); localStorage.setItem('shortsMuted', 'false'); }
@@ -1889,8 +1894,26 @@
         });
         document.getElementById('shortsSound').addEventListener('click', toggleShortsMute);
         document.getElementById('shortsLike').addEventListener('click', toggleShortsLike);
-        document.getElementById('shortsPrev').addEventListener('click', shortsPrev);
-        document.getElementById('shortsNext').addEventListener('click', shortsNext);
+
+        // Свайп по Shorts
+        let sx = 0, sy = 0;
+        const frame = document.querySelector('.shorts-frame');
+        frame.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, {passive:true});
+        frame.addEventListener('touchend', e => {
+            const dx = e.changedTouches[0].clientX - sx;
+            const dy = e.changedTouches[0].clientY - sy;
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                if (dx < 0) shortsNext(); else shortsPrev();
+            }
+        });
+        frame.addEventListener('mousedown', e => { sx = e.clientX; sy = e.clientY; });
+        frame.addEventListener('mouseup', e => {
+            const dx = e.clientX - sx;
+            const dy = e.clientY - sy;
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                if (dx < 0) shortsNext(); else shortsPrev();
+            }
+        });
 
         // Восстанавливаем кеш или грузим
         const cached = localStorage.getItem('shortsCache');
