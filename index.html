@@ -1949,29 +1949,34 @@
 
         function silentRefresh() {
             if (!window.google) return;
-            const c = google.accounts.oauth2.initTokenClient({
-                client_id: OAUTH_CLIENT_ID,
-                scope: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/userinfo.profile',
-                prompt: '',
-                callback: r => {
-                    if (r.access_token) {
-                        accessToken = r.access_token;
-                        localStorage.setItem('ytAccessToken', accessToken);
-                        fetchUserProfile(accessToken);
-                        updateOAuthUI();
-                    } else {
-                        accessToken = null;
-                        localStorage.removeItem('ytAccessToken');
-                        updateOAuthUI();
+            try {
+                const c = google.accounts.oauth2.initTokenClient({
+                    client_id: OAUTH_CLIENT_ID,
+                    scope: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/userinfo.profile',
+                    callback: r => {
+                        if (r.access_token) {
+                            accessToken = r.access_token;
+                            localStorage.setItem('ytAccessToken', accessToken);
+                            fetchUserProfile(accessToken);
+                            updateOAuthUI();
+                        }
                     }
-                }
-            });
-            c.requestAccessToken();
+                });
+                c.requestAccessToken({ prompt: '' });
+            } catch(e) {}
         }
 
         function initOAuth() {
-            if (accessToken) silentRefresh();
-            else updateOAuthUI();
+            if (accessToken) {
+                const savedName = localStorage.getItem('ytProfileName');
+                const savedPic = localStorage.getItem('ytProfilePic');
+                if (savedName) oauthName.textContent = savedName;
+                if (savedPic) oauthAvatar.src = savedPic;
+                updateOAuthUI();
+                silentRefresh();
+            } else {
+                updateOAuthUI();
+            }
         }
 
         async function fetchUserProfile(token) {
@@ -1980,9 +1985,9 @@
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const d = await r.json();
-                if (d.picture) oauthAvatar.src = d.picture;
-                if (d.name) oauthName.textContent = d.name;
-                else if (d.email) oauthName.textContent = d.email;
+                if (d.picture) { oauthAvatar.src = d.picture; localStorage.setItem('ytProfilePic', d.picture); }
+                if (d.name) { oauthName.textContent = d.name; localStorage.setItem('ytProfileName', d.name); }
+                else if (d.email) { oauthName.textContent = d.email; localStorage.setItem('ytProfileName', d.email); }
             } catch(e) {}
         }
 
@@ -2152,53 +2157,54 @@
             } catch(e) {}
         }
 
+        async function searchChannelShorts(chIds, key) {
+            const ids = [];
+            const selected = chIds.sort(() => Math.random() - 0.5).slice(0, 5);
+            const promises = selected.map(cid =>
+                fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&channelId=${cid}&maxResults=5&key=${key}`)
+                    .then(r => r.json()).catch(() => ({}))
+            );
+            const results = await Promise.all(promises);
+            results.forEach(d => { if (d.items) d.items.forEach(v => { if (v.id.videoId) ids.push(v.id.videoId); }); });
+            return ids;
+        }
+
         async function fetchShorts() {
             const key = localStorage.getItem('ytApiKey');
-            if (!key) return;
+            if (!key || !accessToken) return;
             let allIds = [];
 
-            // Если есть токен — тянем подписки и ищем шортсы оттуда
-            if (accessToken) {
-                try {
-                    const subRes = await fetch('https://www.googleapis.com/youtube/v3/subscriptions?part=snippet&mine=true&maxResults=50', {
-                        headers: { 'Authorization': 'Bearer ' + accessToken }
-                    });
-                    const subData = await subRes.json();
-                    if (subData.items && subData.items.length > 0) {
-                        const chIds = subData.items.map(i => i.snippet.resourceId.channelId).filter(Boolean).sort(() => Math.random() - 0.5);
-                        const selected = chIds.slice(0, 5);
-                        const promises = selected.map(cid =>
-                            fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&channelId=${cid}&maxResults=5&key=${key}`)
-                                .then(r => r.json())
-                                .catch(() => ({}))
-                        );
-                        const results = await Promise.all(promises);
-                        results.forEach(d => {
-                            if (d.items) d.items.forEach(v => { if (v.id.videoId) allIds.push(v.id.videoId); });
-                        });
-                    }
-                } catch(e) { console.warn('fetchSubs fail:', e); }
-            }
-
-            // Общий поиск русских шортсов (всегда)
             try {
-                const queries = ['shorts', 'youtube shorts', '#shorts'];
-                const q = queries[Math.floor(Math.random() * queries.length)];
-                const r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&maxResults=30&regionCode=RU&relevanceLanguage=ru&q=${encodeURIComponent(q)}&videoEmbeddable=true&key=${key}`);
-                const d = await r.json();
-                if (d.items) d.items.forEach(v => { if (v.id.videoId) allIds.push(v.id.videoId); });
-            } catch(e) { console.warn('searchShorts fail:', e); }
+                // 1. Подписки
+                const subRes = await fetch('https://www.googleapis.com/youtube/v3/subscriptions?part=snippet&mine=true&maxResults=50', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                if (subRes.status === 401) { updateOAuthUI(); return; }
+                const subData = await subRes.json();
+                const subChIds = (subData.items || []).map(i => i.snippet.resourceId.channelId).filter(Boolean);
+                if (subChIds.length > 0) {
+                    const subShorts = await searchChannelShorts(subChIds, key);
+                    allIds.push(...subShorts);
+                }
 
-            // Если пусто — пробуем с другими запросами
-            if (allIds.length < 5) {
-                try {
-                    const r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&maxResults=30&regionCode=RU&relevanceLanguage=ru&q=приколы&videoEmbeddable=true&key=${key}`);
-                    const d = await r.json();
-                    if (d.items) d.items.forEach(v => { if (v.id.videoId) allIds.push(v.id.videoId); });
-                } catch(e) {}
-            }
+                // 2. Лайкнутые видео — берём каналы оттуда
+                const likesRes = await fetch('https://www.googleapis.com/youtube/v3/videos?part=snippet&myRating=like&maxResults=20', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                if (likesRes.ok) {
+                    const likesData = await likesRes.json();
+                    const likedChIds = [...new Set((likesData.items || []).map(v => v.snippet.channelId).filter(Boolean))];
+                    if (likedChIds.length > 0) {
+                        // Убираем каналы, которые уже в подписках
+                        const newChs = likedChIds.filter(id => !subChIds.includes(id));
+                        if (newChs.length > 0) {
+                            const likeShorts = await searchChannelShorts(newChs, key);
+                            allIds.push(...likeShorts);
+                        }
+                    }
+                }
+            } catch(e) { console.warn('fetchShorts fail:', e); }
 
-            // Удаляем дубликаты, перемешиваем
             allIds = [...new Set(allIds)].sort(() => Math.random() - 0.5);
             if (allIds.length > 0) {
                 shortsList = ['2cllnp5cE0o', ...allIds];
