@@ -526,11 +526,22 @@
         #shortsSound { bottom: 16px; left: 16px; }
         #shortsSound.muted { opacity: 1; color: rgba(255,255,255,0.4); }
         .shorts-like {
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            bottom: 60px; left: 16px;
             display: flex; flex-direction: column; align-items: center; gap: 2px;
         }
         .shorts-like span { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
         .shorts-like.liked svg { color: #ff4d4d; }
+        .shorts-nav {
+            position: absolute; z-index: 3; cursor: pointer; transition: opacity 0.3s;
+            top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.5);
+            opacity: 1; animation: fadeNav 3s ease forwards;
+        }
+        .shorts-nav:hover { opacity: 1 !important; animation: none; }
+        .shorts-frame:hover .shorts-nav { opacity: 1; animation: none; }
+        @keyframes fadeNav { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
+        .shorts-nav svg { width: 28px; height: 28px; filter: drop-shadow(0 0 4px rgba(0,0,0,0.5)); }
+        #shortsPrev { left: 4px; }
+        .shorts-nav-next { right: 4px; }
         .shorts-swipe-overlay {
             position: absolute; z-index: 3; inset: 0;
             touch-action: none;
@@ -760,6 +771,8 @@
                     <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/></svg>
                     <span id="shortsLikeCount"></span>
                 </div>
+                <div class="shorts-nav" id="shortsPrev"><svg viewBox="0 0 24 24"><path d="M7 6v12h2V6H7zm10 0l-6 6 6 6V6z" fill="currentColor"/></svg></div>
+                <div class="shorts-nav shorts-nav-next" id="shortsNext"><svg viewBox="0 0 24 24"><path d="M17 6v12h-2V6h2zm-10 0l6 6-6 6V6z" fill="currentColor"/></svg></div>
                 <div class="shorts-swipe-overlay" id="shortsSwipe"></div>
             </div>
         </div>
@@ -1836,6 +1849,12 @@
             const mute = localStorage.getItem('shortsMuted') !== 'false';
             player.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=' + (autoplay ? 1 : 0) + '&mute=' + (mute ? 1 : 0) + '&loop=1&playlist=' + id + '&controls=1&modestbranding=1&rel=0';
             updateShortsUI();
+            // Сброс анимации кнопок
+            document.querySelectorAll('.shorts-nav').forEach(el => {
+                el.style.animation = 'none';
+                void el.offsetWidth;
+                el.style.animation = '';
+            });
         }
 
         function toggleShortsMute() {
@@ -1866,6 +1885,8 @@
         });
         document.getElementById('shortsSound').addEventListener('click', toggleShortsMute);
         document.getElementById('shortsLike').addEventListener('click', toggleShortsLike);
+        document.getElementById('shortsPrev').addEventListener('click', shortsPrev);
+        document.getElementById('shortsNext').addEventListener('click', shortsNext);
 
         // Свайп по Shorts (через overlay поверх iframe)
         let sx = 0, sy = 0;
