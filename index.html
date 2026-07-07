@@ -258,6 +258,37 @@
         .settings-panel .close-btn:hover {
             color: #fff;
         }
+        .settings-section {
+            margin-top: 16px; padding-top: 14px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .settings-section:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+        .settings-section-header {
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; user-select: none;
+            padding: 6px 0;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.8rem; font-weight: 500;
+            letter-spacing: 0.3px;
+            transition: color 0.2s;
+        }
+        .settings-section-header:hover { color: #fff; }
+        .settings-section-header .ss-icon { font-size: 1rem; line-height: 1; }
+        .settings-section-header .ss-arrow {
+            margin-left: auto; font-size: 0.7rem;
+            transition: transform 0.3s;
+            color: rgba(255,255,255,0.3);
+        }
+        .settings-section-header.open .ss-arrow { transform: rotate(90deg); }
+        .settings-section-body {
+            overflow: hidden; max-height: 0; opacity: 0;
+            transition: max-height 0.35s ease, opacity 0.35s ease, margin 0.35s ease;
+            margin-top: 0;
+        }
+        .settings-section-body.open {
+            max-height: 600px; opacity: 1;
+            margin-top: 10px;
+        }
         .gif-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -482,7 +513,7 @@
             left: 0;
             top: 0;
             height: 100vh;
-            width: 320px;
+            width: 440px;
             z-index: 90;
             transform: translateX(-100%);
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -499,6 +530,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: relative;
         }
         .shorts-body h3 { color: rgba(255,255,255,0.6); font-weight: 300; font-size: 0.9rem; margin: 0 0 10px 0; text-align: center; }
         .shorts-body .shorts-input-row {
@@ -537,7 +569,7 @@
         #shortsPlayer { position: absolute; inset: 0; }
         .shorts-actions {
             position: absolute; bottom: 70px; right: 8px; z-index: 4;
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            display: flex; flex-direction: column; align-items: center; gap: 14px;
             pointer-events: none;
         }
         .shorts-actions .sa-btn {
@@ -549,6 +581,132 @@
         }
         .shorts-actions .sa-btn:hover { background: rgba(0,0,0,0.6); }
         .shorts-actions .sa-btn svg { width: 20px; height: 20px; fill: currentColor; }
+        .shorts-actions .sa-btn.active-like { color: #3ea6ff; }
+        .shorts-actions .sa-btn.active-dislike { color: #ff6b6b; }
+        .shorts-actions .sa-btn-group {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            pointer-events: none;
+        }
+        .shorts-actions .sa-btn-group .sa-count {
+            font-size: 0.55rem; color: #fff; line-height: 1.2;
+            pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            max-width: 44px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            text-align: center;
+        }
+        .shorts-actions .sa-btn-group .sa-btn { pointer-events: auto; }
+        /* Comments panel (YouTube-style sheet) */
+        .shorts-comments-panel {
+            position: absolute; left: 0; right: 0; bottom: 0; z-index: 10;
+            background: rgba(14,14,14,0.96); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 14px 14px 0 0;
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.35s ease, opacity 0.35s ease;
+            opacity: 0; pointer-events: none;
+            display: flex; flex-direction: column;
+        }
+        .shorts-comments-panel.open {
+            max-height: 85%; opacity: 1; pointer-events: auto;
+        }
+        .scp-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
+        }
+        .scp-header .scp-title { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 500; }
+        .scp-header .scp-close {
+            background: none; border: none; color: rgba(255,255,255,0.4);
+            font-size: 1.3rem; cursor: pointer; padding: 0 4px; line-height: 1;
+        }
+        .scp-header .scp-close:hover { color: #fff; }
+        .scp-body {
+            flex: 1; overflow-y: auto; padding: 10px 16px 12px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .scp-body .sc-item {
+            font-size: 0.8rem; color: rgba(255,255,255,0.75);
+            line-height: 1.45; display: flex; gap: 10px;
+        }
+        .scp-body .sc-item .sc-avatar {
+            width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+            margin-top: 2px; background: rgba(255,255,255,0.08);
+        }
+        .scp-body .sc-item .sc-avatar img { width: 100%; height: 100%; border-radius: 50%; }
+        .scp-body .sc-item .sc-text { flex: 1; min-width: 0; }
+        .scp-body .sc-item .sc-top {
+            display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+        }
+        .scp-body .sc-item .sc-author {
+            font-weight: 600; color: #fff; font-size: 0.75rem;
+        }
+        .scp-body .sc-item .sc-like {
+            font-size: 0.65rem; color: rgba(255,255,255,0.35);
+            display: inline-flex; align-items: center; gap: 2px;
+        }
+        .scp-body .sc-item .sc-like::before { content: '♥'; font-size: 0.6rem; }
+        .scp-body .sc-item .sc-body-text {
+            display: block; margin-top: 2px;
+            word-break: break-word;
+        }
+        .scp-body .sc-empty {
+            text-align: center; font-size: 0.7rem;
+            color: rgba(255,255,255,0.3); padding: 16px 0;
+        }
+        .scp-body .sc-load {
+            text-align: center; font-size: 0.65rem;
+            color: #3ea6ff; padding: 8px 0; cursor: pointer;
+            transition: color 0.2s;
+        }
+        .scp-body .sc-load:hover { color: #6bb9ff; text-decoration: underline; }
+        .scp-input {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 16px 10px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
+        }
+        .scp-input input {
+            flex: 1; background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 18px; padding: 8px 14px;
+            color: #fff; font-size: 0.75rem; outline: none;
+        }
+        .scp-input input:focus { border-color: #3ea6ff; }
+        .scp-input input::placeholder { color: rgba(255,255,255,0.3); }
+        .scp-input button {
+            width: 32px; height: 32px; border-radius: 50%; border: none;
+            background: #3ea6ff; color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: background 0.2s;
+            font-size: 1rem; line-height: 1;
+        }
+        .scp-input button:hover { background: #65b8ff; }
+        .scp-input button:disabled { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.3); cursor: default; }
+        .shorts-banner {
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 6; pointer-events: none;
+            display: none;
+        }
+        .shorts-banner.show { display: block; }
+        .shorts-banner .sb-content {
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px; padding: 10px 16px;
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            pointer-events: auto;
+            animation: fadeInUp 0.4s ease;
+        }
+        .shorts-banner .sb-text {
+            font-size: 0.7rem; color: rgba(255,255,255,0.8);
+            text-align: center; text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+        .shorts-banner .sb-link {
+            font-size: 0.8rem; color: #3ea6ff; font-weight: 600;
+            text-decoration: none; cursor: pointer;
+            transition: color 0.2s;
+        }
+        .shorts-banner .sb-link:hover { color: #6bb9ff; text-decoration: underline; }
         .shorts-bottom {
             position: absolute; bottom: 0; left: 0; right: 0; z-index: 4;
             padding: 14px 10px 10px; display: flex; align-items: flex-end; gap: 8px;
@@ -701,109 +859,134 @@
     <div class="settings-overlay" id="settingsOverlay">
         <div class="settings-panel">
             <button class="close-btn" id="settingsClose">&times;</button>
-            <h2>Оформление</h2>
-            <div class="gif-grid" id="gifGrid"></div>
+            <h2>Настройки</h2>
 
-            <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);text-align:center">
-                <div style="margin-bottom:12px;font-size:0.8rem;color:rgba(255,255,255,0.4)">— или загрузи свою —</div>
-                <label for="customGif" style="display:inline-block;padding:10px 20px;border-radius:12px;border:1px dashed rgba(255,255,255,0.3);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.85rem">
-                    Выбрать файл
-                    <input type="file" id="customGif" accept="image/gif,image/png,image/jpeg,image/webp" style="display:none">
-                </label>
-                <div id="customPreview" style="margin-top:14px;display:none;border-radius:12px;overflow:hidden;border:2px solid rgba(255,255,255,0.2);max-width:200px;margin-left:auto;margin-right:auto">
-                    <img id="customPreviewImg" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover" alt="preview">
+            <!-- Интерфейс -->
+            <div class="settings-section">
+                <div class="settings-section-header open" data-section="interface">
+                    <span class="ss-icon">🎨</span> Интерфейс
+                    <span class="ss-arrow">▶</span>
+                </div>
+                <div class="settings-section-body open" id="ss-interface">
+                    <div class="gif-grid" id="gifGrid"></div>
+                    <div style="margin-top:12px;text-align:center">
+                        <label for="customGif" style="display:inline-block;padding:8px 14px;border-radius:10px;border:1px dashed rgba(255,255,255,0.25);color:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.3s;font-size:0.75rem">
+                            Загрузить фон
+                            <input type="file" id="customGif" accept="image/gif,image/png,image/jpeg,image/webp" style="display:none">
+                        </label>
+                        <div id="customPreview" style="margin-top:10px;display:none;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.15);max-width:180px;margin-left:auto;margin-right:auto">
+                            <img id="customPreviewImg" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover" alt="preview">
+                        </div>
+                    </div>
+                    <div style="margin-top:12px;text-align:center">
+                        <label id="panelToggle" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;font-size:0.75rem;background:none">
+                            <span id="panelIcon">🪟</span> <span id="panelLabel">Стеклянная панель</span>
+                        </label>
+                    </div>
+                    <div style="margin-top:10px;text-align:center">
+                        <div style="margin-bottom:6px;font-size:0.7rem;color:rgba(255,255,255,0.4)">Формат даты</div>
+                        <div style="display:flex;gap:6px;justify-content:center">
+                            <label id="dateFmtVerbose" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);cursor:pointer;font-size:0.7rem;transition:all 0.3s;background:rgba(255,255,255,0.08)">7 июля 2026</label>
+                            <label id="dateFmtShort" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);cursor:pointer;font-size:0.7rem;transition:all 0.3s;background:none">07.07.2026</label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);text-align:center">
-                <div style="margin-bottom:12px;font-size:0.85rem;color:rgba(255,255,255,0.7)">Эффект частиц</div>
-                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-                    <label class="p-btn" data-p="off" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">Выкл</label>
-                    <label class="p-btn" data-p="sakura" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">🌸 Сакура</label>
-                    <label class="p-btn" data-p="rain" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">🌧 Дождь</label>
-                    <label class="p-btn" data-p="snow" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">❄ Снег</label>
-                     <label class="p-btn" data-p="ash" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">🔥 Огонь</label>
-                    <label class="p-btn" data-p="neon" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">💜 Неон</label>
-                    <label class="p-btn" data-p="ashpetal" style="display:inline-block;padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:rgba(255,255,255,0.05)">🖤 Пепел</label>
+            <!-- Звуки -->
+            <div class="settings-section">
+                <div class="settings-section-header" data-section="audio">
+                    <span class="ss-icon">🔊</span> Звуки
+                    <span class="ss-arrow">▶</span>
                 </div>
-                <label id="muteBtn" style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:none">
-                    <span id="muteIcon">🔊</span> <span id="muteLabel">Звук вкл</span>
-                </label>
-                <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;align-items:center">
-                    <div style="display:flex;align-items:center;gap:10px">
-                        <span style="font-size:0.75rem;color:rgba(255,255,255,0.35);min-width:12px">✨</span>
-                        <input type="range" id="effectsVolume" min="0" max="100" value="30" style="width:140px;height:4px;border-radius:2px;background:rgba(255,255,255,0.12);-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;accent-color:rgba(255,255,255,0.4)">
-                        <span id="effectsVolLabel" style="font-size:0.75rem;color:rgba(255,255,255,0.35);min-width:24px;text-align:center">30</span>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:10px">
-                        <span style="font-size:0.75rem;color:rgba(255,255,255,0.35);min-width:12px">🎵</span>
-                        <input type="range" id="lofiVolume" min="0" max="100" value="12" style="width:140px;height:4px;border-radius:2px;background:rgba(255,255,255,0.12);-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;accent-color:rgba(255,255,255,0.4)">
-                        <span id="lofiVolLabel" style="font-size:0.75rem;color:rgba(255,255,255,0.35);min-width:24px;text-align:center">12</span>
-                    </div>
-                </div>
-                <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)">
-                    <div style="margin-bottom:8px;font-size:0.8rem;color:rgba(255,255,255,0.5)">Источник музыки</div>
-                    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px">
-                        <label id="musicSrcGen" style="padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);cursor:pointer;font-size:0.75rem;transition:all 0.3s;background:rgba(255,255,255,0.08)">Lo-fi генерация</label>
-                        <label id="musicSrcFile" style="padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);cursor:pointer;font-size:0.75rem;transition:all 0.3s;background:none">Свой файл</label>
-                    </div>
-                    <div id="musicFileSection" style="display:none;text-align:center">
-                        <label for="customAudio" style="display:inline-block;padding:8px 16px;border-radius:8px;border:1px dashed rgba(255,255,255,0.2);color:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;font-size:0.75rem">
-                            Выбрать MP3 / WAV / OGG
-                            <input type="file" id="customAudio" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp3" style="display:none">
-                        </label>
-                        <div id="audioFileName" style="margin-top:6px;font-size:0.7rem;color:rgba(255,255,255,0.25)"></div>
-                    </div>
-                </div>
-
-                <!-- Формат даты -->
-                <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);text-align:center">
-                    <div style="margin-bottom:8px;font-size:0.8rem;color:rgba(255,255,255,0.5)">Формат даты</div>
-                    <div style="display:flex;gap:8px;justify-content:center">
-                        <label id="dateFmtVerbose" style="padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);cursor:pointer;font-size:0.75rem;transition:all 0.3s;background:rgba(255,255,255,0.08)">7 июля 2026</label>
-                        <label id="dateFmtShort" style="padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);cursor:pointer;font-size:0.75rem;transition:all 0.3s;background:none">07.07.2026</label>
-                    </div>
-                </div>
-
-                <!-- Прозрачность панели -->
-                <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);text-align:center">
-                    <label id="panelToggle" style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;font-size:0.8rem;background:none">
-                        <span id="panelIcon">🪟</span> <span id="panelLabel">Стеклянная панель</span>
+                <div class="settings-section-body" id="ss-audio">
+                    <label id="muteBtn" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;font-size:0.75rem;background:none">
+                        <span id="muteIcon">🔊</span> <span id="muteLabel">Звук вкл</span>
                     </label>
+                    <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;align-items:center">
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span style="font-size:0.7rem;color:rgba(255,255,255,0.35);min-width:10px">✨</span>
+                            <input type="range" id="effectsVolume" min="0" max="100" value="30" style="width:130px;height:3px;border-radius:2px;background:rgba(255,255,255,0.12);-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;accent-color:rgba(255,255,255,0.4)">
+                            <span id="effectsVolLabel" style="font-size:0.7rem;color:rgba(255,255,255,0.35);min-width:20px;text-align:center">30</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span style="font-size:0.7rem;color:rgba(255,255,255,0.35);min-width:10px">🎵</span>
+                            <input type="range" id="lofiVolume" min="0" max="100" value="12" style="width:130px;height:3px;border-radius:2px;background:rgba(255,255,255,0.12);-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;accent-color:rgba(255,255,255,0.4)">
+                            <span id="lofiVolLabel" style="font-size:0.7rem;color:rgba(255,255,255,0.35);min-width:20px;text-align:center">12</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px">
+                        <div style="margin-bottom:6px;font-size:0.7rem;color:rgba(255,255,255,0.4);text-align:center">Источник музыки</div>
+                        <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px">
+                            <label id="musicSrcGen" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);cursor:pointer;font-size:0.7rem;transition:all 0.3s;background:rgba(255,255,255,0.08)">Lo-fi</label>
+                            <label id="musicSrcFile" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);cursor:pointer;font-size:0.7rem;transition:all 0.3s;background:none">Файл</label>
+                        </div>
+                        <div id="musicFileSection" style="display:none;text-align:center">
+                            <label for="customAudio" style="display:inline-block;padding:6px 12px;border-radius:6px;border:1px dashed rgba(255,255,255,0.2);color:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.3s;font-size:0.7rem">
+                                Выбрать MP3 / WAV / OGG
+                                <input type="file" id="customAudio" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp3" style="display:none">
+                            </label>
+                            <div id="audioFileName" style="margin-top:4px;font-size:0.65rem;color:rgba(255,255,255,0.25)"></div>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <!-- YouTube API -->
-                <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);text-align:center">
-                    <div style="margin-bottom:6px;font-size:0.8rem;color:rgba(255,255,255,0.5)">🔑 YouTube API ключ</div>
-                    <input type="text" id="ytApiKey" placeholder="AIzaSy..." style="width:90%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:7px 10px;color:rgba(255,255,255,0.7);font-size:0.7rem;outline:none;text-align:center">
-                    <div style="margin-top:4px;font-size:0.6rem;color:rgba(255,255,255,0.2)">Бесплатно в <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:rgba(255,255,255,0.3)">Google Cloud Console</a></div>
+            <!-- YouTube -->
+            <div class="settings-section">
+                <div class="settings-section-header" data-section="youtube">
+                    <span class="ss-icon">▶</span> YouTube
+                    <span class="ss-arrow">▶</span>
                 </div>
-
-                <!-- Google OAuth -->
-                <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);text-align:center">
-                    <div style="margin-bottom:6px;font-size:0.8rem;color:rgba(255,255,255,0.5)">👤 Вход в YouTube (для своих реков)</div>
-                    <div style="margin-top:10px">
-                        <button id="oauthSignIn" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.8);cursor:pointer;background:rgba(255,255,255,0.08);font-size:0.8rem;transition:all 0.3s">
-                            <svg viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                <div class="settings-section-body" id="ss-youtube">
+                    <div style="text-align:center;margin-bottom:10px">
+                        <div style="margin-bottom:4px;font-size:0.7rem;color:rgba(255,255,255,0.4)">API ключ</div>
+                        <input type="text" id="ytApiKey" placeholder="AIzaSy..." style="width:90%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:6px 8px;color:rgba(255,255,255,0.7);font-size:0.65rem;outline:none;text-align:center">
+                        <div style="margin-top:2px;font-size:0.55rem;color:rgba(255,255,255,0.2)"><a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:rgba(255,255,255,0.3)">Google Cloud Console</a></div>
+                    </div>
+                    <div style="text-align:center">
+                        <div style="margin-bottom:6px;font-size:0.7rem;color:rgba(255,255,255,0.4)">Авторизация (для своих реков)</div>
+                        <button id="oauthSignIn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.8);cursor:pointer;background:rgba(255,255,255,0.08);font-size:0.75rem;transition:all 0.3s">
+                            <svg viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                             Войти через Google
                         </button>
-                    </div>
-                    <div id="oauthStatus" style="margin-top:6px;font-size:0.65rem;color:rgba(255,255,255,0.25)"></div>
-                    <div id="oauthProfile" style="display:none;margin-top:8px;align-items:center;gap:8px;justify-content:center">
-                        <img id="oauthAvatar" style="width:28px;height:28px;border-radius:50%" alt="">
-                        <span id="oauthName" style="font-size:0.75rem;color:rgba(255,255,255,0.6)"></span>
-                        <button id="oauthSignOut" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);border-radius:6px;padding:4px 10px;font-size:0.7rem;cursor:pointer">Выйти</button>
+                        <div id="oauthStatus" style="margin-top:4px;font-size:0.6rem;color:rgba(255,255,255,0.25)"></div>
+                        <div id="oauthProfile" style="display:none;margin-top:6px;align-items:center;gap:6px;justify-content:center;font-size:0.7rem">
+                            <img id="oauthAvatar" style="width:24px;height:24px;border-radius:50%" alt="">
+                            <span id="oauthName" style="color:rgba(255,255,255,0.6)"></span>
+                            <button id="oauthSignOut" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);border-radius:4px;padding:3px 8px;font-size:0.65rem;cursor:pointer">Выйти</button>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Мои ссылки -->
-                <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)">
-                    <div style="margin-bottom:8px;font-size:0.8rem;color:rgba(255,255,255,0.5);text-align:center">Мои ссылки</div>
-                    <div id="linksSettingsList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
-                    <div style="display:flex;gap:6px">
-                        <input type="text" id="newLinkName" placeholder="Название" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:6px 8px;color:rgba(255,255,255,0.6);font-size:0.7rem;outline:none">
-                        <input type="text" id="newLinkUrl" placeholder="https://" style="flex:2;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:6px 8px;color:rgba(255,255,255,0.6);font-size:0.7rem;outline:none">
-                        <button id="addLinkBtn" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);cursor:pointer;font-size:0.8rem">+</button>
+            <!-- Прочее -->
+            <div class="settings-section">
+                <div class="settings-section-header" data-section="other">
+                    <span class="ss-icon">⚙</span> Прочее
+                    <span class="ss-arrow">▶</span>
+                </div>
+                <div class="settings-section-body" id="ss-other">
+                    <div style="text-align:center;margin-bottom:10px">
+                        <div style="margin-bottom:8px;font-size:0.7rem;color:rgba(255,255,255,0.4)">Эффект частиц</div>
+                        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+                            <label class="p-btn" data-p="off" style="padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;font-size:0.7rem;background:rgba(255,255,255,0.05)">Выкл</label>
+                            <label class="p-btn" data-p="sakura" style="padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;font-size:0.7rem;background:rgba(255,255,255,0.05)">🌸 Сакура</label>
+                            <label class="p-btn" data-p="rain" style="padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;font-size:0.7rem;background:rgba(255,255,255,0.05)">🌧 Дождь</label>
+                            <label class="p-btn" data-p="snow" style="padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;font-size:0.7rem;background:rgba(255,255,255,0.05)">❄ Снег</label>
+                            <label class="p-btn" data-p="ash" style="padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;font-size:0.7rem;background:rgba(255,255,255,0.05)">🔥 Огонь</label>
+                            <label class="p-btn" data-p="neon" style="padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;font-size:0.7rem;background:rgba(255,255,255,0.05)">💜 Неон</label>
+                            <label class="p-btn" data-p="ashpetal" style="padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);cursor:pointer;font-size:0.7rem;background:rgba(255,255,255,0.05)">🖤 Пепел</label>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="margin-bottom:6px;font-size:0.7rem;color:rgba(255,255,255,0.4);text-align:center">Мои ссылки</div>
+                        <div id="linksSettingsList" style="display:flex;flex-direction:column;gap:4px;margin-bottom:6px"></div>
+                        <div style="display:flex;gap:4px">
+                            <input type="text" id="newLinkName" placeholder="Название" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:5px;padding:5px 6px;color:rgba(255,255,255,0.6);font-size:0.65rem;outline:none">
+                            <input type="text" id="newLinkUrl" placeholder="https://" style="flex:2;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:5px;padding:5px 6px;color:rgba(255,255,255,0.6);font-size:0.65rem;outline:none">
+                            <button id="addLinkBtn" style="padding:5px 8px;border-radius:5px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);cursor:pointer;font-size:0.75rem">+</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -821,15 +1004,34 @@
                 <div id="shortsPlayer"></div>
                 <div class="shorts-overlay" id="shortsOverlay"></div>
                 <div class="shorts-actions">
-                    <button class="sa-btn" id="saLike" title="Нравится">
-                        <svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
-                    </button>
-                    <button class="sa-btn" id="saDislike" title="Не нравится">
-                        <svg viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
-                    </button>
-                    <button class="sa-btn" id="saShare" title="Поделиться">
-                        <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
-                    </button>
+                    <div class="sa-btn-group">
+                        <button class="sa-btn" id="saLike" title="Нравится">
+                            <svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                        </button>
+                        <span class="sa-count" id="saLikeCount"></span>
+                    </div>
+                    <div class="sa-btn-group">
+                        <button class="sa-btn" id="saDislike" title="Не нравится">
+                            <svg viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>
+                        </button>
+                    </div>
+                    <div class="sa-btn-group">
+                        <button class="sa-btn" id="saShare" title="Поделиться">
+                            <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+                        </button>
+                    </div>
+                    <div class="sa-btn-group">
+                        <button class="sa-btn" id="saComment" title="Комментарии">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/><path d="M7 9h10v2H7zm0 3h7v2H7z" opacity="0.7"/></svg>
+                        </button>
+                        <span class="sa-count" id="saCommentCount"></span>
+                    </div>
+                </div>
+                <div class="shorts-banner" id="shortsBanner">
+                    <div class="sb-content">
+                        <span class="sb-text">ну это норм такой канал так то</span>
+                        <a class="sb-link" href="https://www.youtube.com/@NEFRSTUDIO" target="_blank" rel="noopener">NEFRSTUDIO →</a>
+                    </div>
                 </div>
                 <div class="shorts-bottom">
                     <div class="shorts-bottom-left">
@@ -844,6 +1046,17 @@
                     </button>
                 </div>
                 <div class="shorts-progress" id="shortsProgress"><div class="shorts-progress-bar" id="shortsProgressBar"></div></div>
+            </div>
+        </div>
+        <div class="shorts-comments-panel" id="shortsCommentsPanel">
+            <div class="scp-header">
+                <span class="scp-title">Комментарии</span>
+                <button class="scp-close" id="scpClose">&times;</button>
+            </div>
+            <div class="scp-body" id="scpBody"></div>
+            <div class="scp-input" id="scpInput">
+                <input type="text" id="scpInputField" placeholder="Написать комментарий..." maxlength="500">
+                <button id="scpSendBtn" disabled>➤</button>
             </div>
         </div>
     </div>
@@ -1952,7 +2165,7 @@
             try {
                 const c = google.accounts.oauth2.initTokenClient({
                     client_id: OAUTH_CLIENT_ID,
-                    scope: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/userinfo.profile',
+                    scope: 'https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/userinfo.profile',
                     callback: r => {
                         if (r.access_token) {
                             accessToken = r.access_token;
@@ -2011,7 +2224,7 @@
             if (oauthStatus) oauthStatus.textContent = 'Открываю окно авторизации...';
             const c = google.accounts.oauth2.initTokenClient({
                 client_id: OAUTH_CLIENT_ID,
-                scope: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/userinfo.profile',
+                scope: 'https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/userinfo.profile',
                 callback: r => {
                     if (r.access_token) {
                         accessToken = r.access_token;
@@ -2126,6 +2339,7 @@
             if (shortsMuted) ytPlayer.mute();
             document.getElementById('shortsProgressBar').style.width = '0%';
             updateShortsInfo();
+            updateRatingUI();
         }
 
         function startProg() {
@@ -2141,27 +2355,114 @@
 
         function stopProg() { if (progTimer) { clearInterval(progTimer); progTimer = null; } }
 
+        let shortsInfoVid = null;
         async function updateShortsInfo() {
             document.getElementById('shortsChannel').textContent = 'YouTube';
             document.getElementById('shortsTitle').textContent = 'Short';
+            document.getElementById('saLikeCount').textContent = '';
+            document.getElementById('saCommentCount').textContent = '';
+            closeCommentsPanel();
+            const banner = document.getElementById('shortsBanner');
+            if (shortsList[shortsIdx] === '2cllnp5cE0o') {
+                const last = +(localStorage.getItem('nefrBannerTs') || 0);
+                if (Date.now() - last > 30 * 60 * 1000) {
+                    banner.classList.add('show');
+                    localStorage.setItem('nefrBannerTs', Date.now());
+                }
+            } else {
+                banner.classList.remove('show');
+            }
             const key = localStorage.getItem('ytApiKey');
             if (!key) return;
+            const vid = shortsList[shortsIdx];
+            shortsInfoVid = vid;
             try {
-                const r = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${shortsList[shortsIdx]}&key=${key}`);
+                const r = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${vid}&key=${key}`);
+                if (shortsInfoVid !== vid) return;
                 const d = await r.json();
                 if (d.items && d.items[0]) {
                     const s = d.items[0].snippet;
+                    const stats = d.items[0].statistics;
                     document.getElementById('shortsChannel').textContent = s.channelTitle;
                     document.getElementById('shortsTitle').textContent = s.title;
+                    if (stats && stats.likeCount) {
+                        const n = +stats.likeCount;
+                        document.getElementById('saLikeCount').textContent = n >= 1000000 ? (n / 1000000).toFixed(1) + 'M' : n >= 1000 ? (n / 1000).toFixed(1) + 'K' : n;
+                    }
+                    if (stats && stats.commentCount) {
+                        const n = +stats.commentCount;
+                        document.getElementById('saCommentCount').textContent = n >= 1000000 ? (n / 1000000).toFixed(1) + 'M' : n >= 1000 ? (n / 1000).toFixed(1) + 'K' : n;
+                    }
                 }
             } catch(e) {}
+        }
+        function escapeHtml(t) {
+            const d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML;
+        }
+        function closeCommentsPanel() {
+            document.getElementById('shortsCommentsPanel').classList.remove('open');
+            commentsPageToken = null;
+        }
+        let commentsPageToken = null;
+        async function fetchComments(append) {
+            const key = localStorage.getItem('ytApiKey');
+            const vid = shortsList[shortsIdx];
+            const body = document.getElementById('scpBody');
+            if (!append) { body.innerHTML = '<div class="sc-empty">Загрузка...</div>'; commentsPageToken = null; }
+            try {
+                const page = commentsPageToken ? '&pageToken=' + commentsPageToken : '';
+                const c = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${vid}&maxResults=50${page}&key=${key}`);
+                const cd = await c.json();
+                if (!append) body.innerHTML = '';
+                if (cd.items && cd.items.length > 0) {
+                    cd.items.forEach(item => {
+                        const top = item.snippet.topLevelComment.snippet;
+                        const div = document.createElement('div');
+                        div.className = 'sc-item';
+                        const pic = top.authorProfileImageUrl || '';
+                        const lc = item.snippet.topLevelComment.snippet.likeCount;
+                        const likeLabel = lc > 0 ? '<span class="sc-like">' + lc + '</span>' : '';
+                        div.innerHTML = '<div class="sc-avatar"><img src="' + pic + '" alt="" loading="lazy"></div>'
+                            + '<div class="sc-text"><div class="sc-top"><span class="sc-author">' + escapeHtml(top.authorDisplayName) + '</span>'
+                            + likeLabel + '</div>'
+                            + '<span class="sc-body-text">' + escapeHtml(top.textDisplay) + '</span></div>';
+                        body.appendChild(div);
+                    });
+                    commentsPageToken = cd.nextPageToken || null;
+                    if (commentsPageToken) {
+                        const load = document.createElement('div');
+                        load.className = 'sc-load';
+                        load.textContent = 'Загрузить ещё';
+                        load.addEventListener('click', () => fetchComments(true));
+                        body.appendChild(load);
+                    }
+                } else if (!append) {
+                    body.innerHTML = '<div class="sc-empty">Комментариев нет</div>';
+                }
+            } catch(e) {
+                if (!append) body.innerHTML = '<div class="sc-empty">Ошибка загрузки</div>';
+            }
         }
 
         async function searchChannelShorts(chIds, key) {
             const ids = [];
-            const selected = chIds.sort(() => Math.random() - 0.5).slice(0, 5);
+            const selected = chIds.sort(() => Math.random() - 0.5).slice(0, 7);
             const promises = selected.map(cid =>
                 fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&channelId=${cid}&maxResults=5&key=${key}`)
+                    .then(r => r.json()).catch(() => ({}))
+            );
+            const results = await Promise.all(promises);
+            results.forEach(d => { if (d.items) d.items.forEach(v => { if (v.id.videoId) ids.push(v.id.videoId); }); });
+            return ids;
+        }
+
+        async function searchShortsByKeywords(keywords, key) {
+            const ids = [];
+            const selected = keywords.sort(() => Math.random() - 0.5).slice(0, 5);
+            const promises = selected.map(q =>
+                fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&q=${encodeURIComponent(q)}&maxResults=5&key=${key}`)
                     .then(r => r.json()).catch(() => ({}))
             );
             const results = await Promise.all(promises);
@@ -2173,6 +2474,7 @@
             const key = localStorage.getItem('ytApiKey');
             if (!key || !accessToken) return;
             let allIds = [];
+            let subChIds = [];
 
             try {
                 // 1. Подписки
@@ -2181,28 +2483,66 @@
                 });
                 if (subRes.status === 401) { updateOAuthUI(); return; }
                 const subData = await subRes.json();
-                const subChIds = (subData.items || []).map(i => i.snippet.resourceId.channelId).filter(Boolean);
+                subChIds = (subData.items || []).map(i => i.snippet.resourceId.channelId).filter(Boolean);
                 if (subChIds.length > 0) {
                     const subShorts = await searchChannelShorts(subChIds, key);
                     allIds.push(...subShorts);
                 }
 
-                // 2. Лайкнутые видео — берём каналы оттуда
-                const likesRes = await fetch('https://www.googleapis.com/youtube/v3/videos?part=snippet&myRating=like&maxResults=20', {
+                // 2. Лайкнутые видео — каналы + ключевые слова
+                const likesRes = await fetch('https://www.googleapis.com/youtube/v3/videos?part=snippet&myRating=like&maxResults=30', {
                     headers: { 'Authorization': 'Bearer ' + accessToken }
                 });
                 if (likesRes.ok) {
                     const likesData = await likesRes.json();
                     const likedChIds = [...new Set((likesData.items || []).map(v => v.snippet.channelId).filter(Boolean))];
-                    if (likedChIds.length > 0) {
-                        // Убираем каналы, которые уже в подписках
-                        const newChs = likedChIds.filter(id => !subChIds.includes(id));
-                        if (newChs.length > 0) {
-                            const likeShorts = await searchChannelShorts(newChs, key);
-                            allIds.push(...likeShorts);
-                        }
+                    const newChs = likedChIds.filter(id => !subChIds.includes(id));
+                    if (newChs.length > 0) {
+                        const likeShorts = await searchChannelShorts(newChs, key);
+                        allIds.push(...likeShorts);
+                    }
+
+                    // 3. Поиск по ключевым словам из лайкнутых видео (чтобы найти шорты по теме)
+                    const titles = (likesData.items || []).map(v => v.snippet.title).filter(Boolean);
+                    const keywords = [];
+                    titles.forEach(t => {
+                        const words = t.replace(/[^\wа-яА-ЯёЁ\s]/g, ' ').split(/\s+/).filter(w => w.length > 3).slice(0, 4);
+                        if (words.length > 0) keywords.push(words.join(' '));
+                    });
+                    if (keywords.length > 0) {
+                        const kwShorts = await searchShortsByKeywords(keywords, key);
+                        allIds.push(...kwShorts);
                     }
                 }
+
+                // 4. Недавние активности (комментарии, добавление в плейлисты) — каналы, с которыми юзер взаимодействовал
+                const actRes = await fetch('https://www.googleapis.com/youtube/v3/activities?mine=true&maxResults=50', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                if (actRes.ok) {
+                    const actData = await actRes.json();
+                    const actChIds = [];
+                    (actData.items || []).forEach(item => {
+                        const type = item.snippet.type;
+                        let chId = null;
+                        if (type === 'like' && item.contentDetails.like) {
+                            chId = item.contentDetails.like.resourceId ? item.contentDetails.like.resourceId.channelId : null;
+                        } else if (type === 'comment' && item.contentDetails.comment) {
+                            chId = item.contentDetails.comment.resourceId ? item.contentDetails.comment.resourceId.channelId : null;
+                        } else if (type === 'favorite' && item.contentDetails.favorite) {
+                            chId = item.contentDetails.favorite.resourceId ? item.contentDetails.favorite.resourceId.channelId : null;
+                        } else if (type === 'playlistItem' && item.contentDetails.playlistItem) {
+                            chId = item.contentDetails.playlistItem.resourceId ? item.contentDetails.playlistItem.resourceId.channelId : null;
+                        }
+                        if (chId) actChIds.push(chId);
+                    });
+                    const newActChs = [...new Set(actChIds)].filter(id => !subChIds.includes(id));
+                    if (newActChs.length > 0) {
+                        const actShorts = await searchChannelShorts(newActChs, key);
+                        allIds.push(...actShorts);
+                    }
+                }
+
             } catch(e) { console.warn('fetchShorts fail:', e); }
 
             allIds = [...new Set(allIds)].sort(() => Math.random() - 0.5);
@@ -2293,6 +2633,99 @@
         }
         updateSoundBtnUI();
 
+        // Comment button
+        document.getElementById('saComment').addEventListener('click', () => {
+            const panel = document.getElementById('shortsCommentsPanel');
+            const isOpen = panel.classList.contains('open');
+            if (isOpen) {
+                closeCommentsPanel();
+            } else {
+                panel.classList.add('open');
+                fetchComments();
+            }
+        });
+        document.getElementById('scpClose').addEventListener('click', closeCommentsPanel);
+
+        // Post comment
+        const scpInput = document.getElementById('scpInputField');
+        const scpSend = document.getElementById('scpSendBtn');
+        scpInput.addEventListener('input', () => { scpSend.disabled = !scpInput.value.trim(); });
+        scpInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !scpSend.disabled) postComment(); });
+        scpSend.addEventListener('click', postComment);
+        async function postComment() {
+            const text = scpInput.value.trim();
+            if (!text || !accessToken) return;
+            scpSend.disabled = true;
+            try {
+                const r = await fetch('https://www.googleapis.com/youtube/v3/commentThreads?part=snippet', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ snippet: { videoId: shortsList[shortsIdx], topLevelComment: { snippet: { textOriginal: text } } } })
+                });
+                if (r.ok) {
+                    scpInput.value = '';
+                    scpSend.disabled = true;
+                    fetchComments();
+                } else if (r.status === 401) { updateOAuthUI(); }
+                else if (r.status === 403) { requestAuth(); }
+            } catch {}
+            scpSend.disabled = !scpInput.value.trim();
+        }
+
+        // Like/dislike state
+        let likedVids = new Set();
+        let dislikedVids = new Set();
+        try {
+            const l = JSON.parse(localStorage.getItem('ytLiked') || '[]');
+            const d = JSON.parse(localStorage.getItem('ytDisliked') || '[]');
+            likedVids = new Set(l); dislikedVids = new Set(d);
+        } catch {}
+        function updateRatingUI() {
+            const vid = shortsList[shortsIdx];
+            const likeBtn = document.getElementById('saLike');
+            const disBtn = document.getElementById('saDislike');
+            likeBtn.classList.toggle('active-like', likedVids.has(vid));
+            disBtn.classList.toggle('active-dislike', dislikedVids.has(vid));
+        }
+        async function rateVideo(vid, rating) {
+            if (!accessToken) return;
+            try {
+                const r = await fetch(`https://www.googleapis.com/youtube/v3/videos/rate?id=${vid}&rating=${rating}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                if (r.status === 401) { updateOAuthUI(); return false; }
+                if (r.status === 403) { requestAuth(); return false; }
+                return r.ok;
+            } catch { return false; }
+        }
+        document.getElementById('saLike').addEventListener('click', async () => {
+            if (!accessToken) { requestAuth(); return; }
+            const vid = shortsList[shortsIdx];
+            const wasLiked = likedVids.has(vid);
+            const newRating = wasLiked ? 'none' : 'like';
+            const ok = await rateVideo(vid, newRating);
+            if (ok) {
+                if (wasLiked) likedVids.delete(vid); else { likedVids.add(vid); dislikedVids.delete(vid); }
+                localStorage.setItem('ytLiked', JSON.stringify([...likedVids]));
+                localStorage.setItem('ytDisliked', JSON.stringify([...dislikedVids]));
+                updateRatingUI();
+            }
+        });
+        document.getElementById('saDislike').addEventListener('click', async () => {
+            if (!accessToken) { requestAuth(); return; }
+            const vid = shortsList[shortsIdx];
+            const wasDisliked = dislikedVids.has(vid);
+            const newRating = wasDisliked ? 'none' : 'dislike';
+            const ok = await rateVideo(vid, newRating);
+            if (ok) {
+                if (wasDisliked) dislikedVids.delete(vid); else { dislikedVids.add(vid); likedVids.delete(vid); }
+                localStorage.setItem('ytLiked', JSON.stringify([...likedVids]));
+                localStorage.setItem('ytDisliked', JSON.stringify([...dislikedVids]));
+                updateRatingUI();
+            }
+        });
+
         const cached = localStorage.getItem('shortsCache');
         if (cached) { try { shortsList = JSON.parse(cached); } catch {} }
         if (!shortsList.includes('2cllnp5cE0o')) shortsList.unshift('2cllnp5cE0o');
@@ -2351,6 +2784,18 @@
         document.getElementById('settingsBtn').addEventListener('click', () => overlay.classList.add('open'));
         document.getElementById('settingsClose').addEventListener('click', () => overlay.classList.remove('open'));
         overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+
+        // Секции настроек (сворачиваемые)
+        document.querySelectorAll('.settings-section-header').forEach(hdr => {
+            hdr.addEventListener('click', () => {
+                const section = hdr.dataset.section;
+                const body = document.getElementById('ss-' + section);
+                if (!body) return;
+                const isOpen = body.classList.contains('open');
+                body.classList.toggle('open');
+                hdr.classList.toggle('open');
+            });
+        });
 
         // Три точки печатаются после "Google" при наведении
         const searchInput = document.getElementById('searchInput');
