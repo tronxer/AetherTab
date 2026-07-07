@@ -734,6 +734,13 @@
                     </label>
                 </div>
 
+                <!-- YouTube API -->
+                <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);text-align:center">
+                    <div style="margin-bottom:6px;font-size:0.8rem;color:rgba(255,255,255,0.5)">🔑 YouTube API ключ</div>
+                    <input type="text" id="ytApiKey" placeholder="AIzaSy..." style="width:90%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:7px 10px;color:rgba(255,255,255,0.7);font-size:0.7rem;outline:none;text-align:center">
+                    <div style="margin-top:4px;font-size:0.6rem;color:rgba(255,255,255,0.2)">Бесплатно в <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:rgba(255,255,255,0.3)">Google Cloud Console</a></div>
+                </div>
+
                 <!-- Мои ссылки -->
                 <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)">
                     <div style="margin-bottom:8px;font-size:0.8rem;color:rgba(255,255,255,0.5);text-align:center">Мои ссылки</div>
@@ -1797,14 +1804,35 @@
         if (addBtn) addBtn.addEventListener('click', addNote);
         if (noteInp) noteInp.addEventListener('keydown', e => { if (e.key === 'Enter') addNote(); });
 
+        // YouTube API — сохранение ключа
+        const ytKeyInput = document.getElementById('ytApiKey');
+        if (ytKeyInput) {
+            ytKeyInput.value = localStorage.getItem('ytApiKey') || 'AIzaSyA8zowhzRL2BbU3j1tSzKz-s52RKpcKg7I';
+            ytKeyInput.addEventListener('input', () => localStorage.setItem('ytApiKey', ytKeyInput.value.trim()));
+        }
+
         // Панель YouTube Shorts — лента
         let shortsPlayer, shortsIdx = 0, shortsReady = false;
-        const shortsList = ['2cllnp5cE0o', 'N_fNNf8lt-M', 'dQw4w9WgXcQ', 'kJQP7kiw5Fk', 'RgKAFK5djSk'];
+        let shortsList = ['2cllnp5cE0o', 'N_fNNf8lt-M', 'dQw4w9WgXcQ', 'kJQP7kiw5Fk', 'RgKAFK5djSk'];
         const shortsMuted = localStorage.getItem('shortsMuted') !== 'false';
         const shortsLikes = JSON.parse(localStorage.getItem('shortsLikes') || '{}');
 
         function shortsNext() { shortsIdx = (shortsIdx + 1) % shortsList.length; loadShorts(true); }
         function shortsPrev() { shortsIdx = (shortsIdx - 1 + shortsList.length) % shortsList.length; loadShorts(true); }
+
+        async function fetchShorts() {
+            const key = localStorage.getItem('ytApiKey');
+            if (!key) return;
+            try {
+                const r = await fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoDuration=short&maxResults=20&regionCode=RU&key=' + key);
+                const d = await r.json();
+                if (d.items && d.items.length > 2) {
+                    const ids = d.items.map(v => v.id.videoId).filter(Boolean).sort(() => Math.random() - 0.5);
+                    shortsList = ['2cllnp5cE0o', ...ids];
+                    localStorage.setItem('shortsCache', JSON.stringify(shortsList));
+                }
+            } catch {}
+        }
 
         function loadShorts(autoplay) {
             if (!shortsReady) { setTimeout(() => loadShorts(autoplay), 300); return; }
@@ -1813,7 +1841,6 @@
             shortsPlayer.setVolume(100);
             shortsPlayer[shortsMuted ? 'mute' : 'unMute']();
             updateShortsUI();
-            // Получаем название через oembed
             fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=' + shortsList[shortsIdx] + '&format=json')
                 .then(r => r.json()).then(d => {
                     const el = document.getElementById('shortsTitle');
@@ -1851,20 +1878,25 @@
             });
         }
 
-        // Загружаем YouTube IFrame API (сработает на GitHub Pages)
+        // Загружаем YouTube IFrame API
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
         document.head.appendChild(tag);
 
         document.getElementById('shortsTrigger').addEventListener('click', () => {
             document.getElementById('shortsPanel').classList.toggle('open');
+            if (document.getElementById('shortsPanel').classList.contains('open')) fetchShorts();
         });
         document.getElementById('shortsSound').addEventListener('click', toggleShortsMute);
         document.getElementById('shortsLike').addEventListener('click', toggleShortsLike);
         document.getElementById('shortsPrev').addEventListener('click', shortsPrev);
         document.getElementById('shortsNext').addEventListener('click', shortsNext);
 
-        // Если API не загрузился (file://), падаем на простой iframe
+        // Восстанавливаем кеш или грузим
+        const cached = localStorage.getItem('shortsCache');
+        if (cached) { try { shortsList = JSON.parse(cached); } catch {} }
+        if (!shortsList.includes('2cllnp5cE0o')) shortsList.unshift('2cllnp5cE0o');
+
         setTimeout(() => {
             if (!shortsReady) {
                 document.getElementById('shortsPlayer').innerHTML = '<iframe src="https://www.youtube.com/embed/' + shortsList[0] + '?autoplay=1&mute=1&loop=1&playlist=' + shortsList.join(',') + '" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;border:none"></iframe>';
