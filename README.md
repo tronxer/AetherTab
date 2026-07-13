@@ -30,7 +30,7 @@ HTML-файл — и страница готова. Это удобно тем, 
 [Custom New Tab URL](https://chromewebstore.google.com/detail/custom-new-tab-url/mmjbdbjnoablegbkcklggeknkfcjkjia)
 и указать в его настройках ссылку на страницу:
 
-[https://tronxer.github.io/aethertab/](https://tronxer.github.io/aethertab/)
+https://tronxer.github.io/AetherTab
 
 Либо просто откройте `index.html` локально (см. «Локальный запуск»).
 
